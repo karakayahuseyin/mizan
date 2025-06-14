@@ -1,10 +1,12 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
+// Use the UI Window class to avoid conflicts
 #include "ui/Window.h"
 #include "renderer/Renderer.h"
 #include "renderer/Tesselator.h"
 #include "renderer/Camera.h"
+#include "modeller/BREPBuilder.h"
 #include <memory>
 #include <vector>
 #include <string>

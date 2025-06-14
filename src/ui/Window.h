@@ -1,5 +1,5 @@
-#ifndef WINDOW_H
-#define WINDOW_H
+#ifndef UI_WINDOW_H
+#define UI_WINDOW_H
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -20,6 +20,9 @@ private:
     double m_lastMouseY = 0.0;
     bool m_firstMouse = true;
     bool m_mouseButtonPressed[3] = {false, false, false}; // Left, Right, Middle
+    
+    // Scroll state
+    double m_scrollDelta = 0.0;
 
 public:
     Window(int width, int height, const std::string& title);
@@ -59,9 +62,6 @@ private:
     static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
     static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
     static void charCallback(GLFWwindow* window, unsigned int c);
-    
-    // Scroll state
-    double m_scrollDelta = 0.0;
 };
 
-#endif // WINDOW_H
+#endif // UI_WINDOW_H

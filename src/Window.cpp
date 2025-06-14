@@ -185,9 +185,13 @@ void Window::getSize(int& width, int& height) const {
 
 void Window::cleanup() {
     if (m_window) {
-        ImGui_ImplOpenGL3_Shutdown();
-        ImGui_ImplGlfw_Shutdown();
-        ImGui::DestroyContext();
+        // Check if ImGui is initialized before shutting down
+        ImGuiContext* context = ImGui::GetCurrentContext();
+        if (context) {
+            ImGui_ImplOpenGL3_Shutdown();
+            ImGui_ImplGlfw_Shutdown();
+            ImGui::DestroyContext();
+        }
         
         glfwDestroyWindow(m_window);
         m_window = nullptr;

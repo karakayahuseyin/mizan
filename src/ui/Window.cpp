@@ -111,9 +111,13 @@ bool Window::initImGui() {
 }
 
 void Window::cleanupImGui() {
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
+    // Check if ImGui is initialized before shutting down
+    ImGuiContext* context = ImGui::GetCurrentContext();
+    if (context) {
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplGlfw_Shutdown();
+        ImGui::DestroyContext();
+    }
 }
 
 void Window::getMousePosition(double& x, double& y) const {
