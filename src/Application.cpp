@@ -141,9 +141,10 @@ void Application::shutdown() {
 }
 
 void Application::createTestMesh() {
-    // Create cube
+    // Create cube using BREP
     SceneObject cubeObj;
-    cubeObj.mesh = MeshGenerator::createCube(1.0f);
+    BREP::Solid cubeSolid = BREP::BREPBuilder::createCubeSolid(1.0f);
+    cubeObj.mesh = Tessellator::tessellate(cubeSolid);
     cubeObj.mesh.setColor(1.0f, 0.0f, 0.0f);
     cubeObj.mesh.setPosition(-2.0f, 1.0f, 0.0f);
     cubeObj.mesh.m_showSolid = m_globalSolidMode;
@@ -153,9 +154,10 @@ void Application::createTestMesh() {
     m_sceneObjects.push_back(cubeObj);
     m_renderer->loadMesh(cubeObj.mesh);
     
-    // Create pyramid
+    // Create pyramid using BREP
     SceneObject pyramidObj;
-    pyramidObj.mesh = MeshGenerator::createPyramid(1.5f);
+    BREP::Solid pyramidSolid = BREP::BREPBuilder::createPyramidSolid(1.5f);
+    pyramidObj.mesh = Tessellator::tessellate(pyramidSolid);
     pyramidObj.mesh.setColor(0.0f, 1.0f, 0.0f);
     pyramidObj.mesh.setPosition(2.0f, 0.0f, 0.0f);
     pyramidObj.mesh.m_showSolid = m_globalSolidMode;
@@ -165,9 +167,10 @@ void Application::createTestMesh() {
     m_sceneObjects.push_back(pyramidObj);
     m_renderer->loadMesh(pyramidObj.mesh);
     
-    // Create another cube
+    // Create another cube using BREP
     SceneObject cube2Obj;
-    cube2Obj.mesh = MeshGenerator::createCube(0.8f);
+    BREP::Solid cube2Solid = BREP::BREPBuilder::createCubeSolid(0.8f);
+    cube2Obj.mesh = Tessellator::tessellate(cube2Solid);
     cube2Obj.mesh.setColor(0.0f, 0.0f, 1.0f);
     cube2Obj.mesh.setPosition(0.0f, 0.5f, 2.0f);
     cube2Obj.mesh.m_showSolid = m_globalSolidMode;
@@ -176,6 +179,29 @@ void Application::createTestMesh() {
     cube2Obj.id = m_nextObjectId++;
     m_sceneObjects.push_back(cube2Obj);
     m_renderer->loadMesh(cube2Obj.mesh);
+}
+
+void Application::addObject(const std::string& type) {
+    SceneObject newObj;
+    newObj.id = m_nextObjectId++;
+    newObj.name = type + " " + std::to_string(newObj.id);
+    
+    if (type == "Cube") {
+        BREP::Solid cubeSolid = BREP::BREPBuilder::createCubeSolid(1.0f);
+        newObj.mesh = Tessellator::tessellate(cubeSolid);
+        newObj.mesh.setColor(0.7f, 0.7f, 0.7f);
+    } else if (type == "Pyramid") {
+        BREP::Solid pyramidSolid = BREP::BREPBuilder::createPyramidSolid(1.0f);
+        newObj.mesh = Tessellator::tessellate(pyramidSolid);
+        newObj.mesh.setColor(0.7f, 0.7f, 0.7f);
+    }
+    
+    // Apply global rendering modes to new objects
+    newObj.mesh.m_showWireframe = m_globalWireframeMode;
+    newObj.mesh.m_showSolid = m_globalSolidMode;
+    
+    m_sceneObjects.push_back(newObj);
+    m_renderer->loadMesh(newObj.mesh);
 }
 
 void Application::setGlobalWireframeMode(bool enabled) {
@@ -200,27 +226,6 @@ void Application::toggleWireframeMode() {
 
 void Application::toggleSolidMode() {
     setGlobalSolidMode(!m_globalSolidMode);
-}
-
-void Application::addObject(const std::string& type) {
-    SceneObject newObj;
-    newObj.id = m_nextObjectId++;
-    newObj.name = type + " " + std::to_string(newObj.id);
-    
-    if (type == "Cube") {
-        newObj.mesh = MeshGenerator::createCube(1.0f);
-        newObj.mesh.setColor(0.7f, 0.7f, 0.7f);
-    } else if (type == "Pyramid") {
-        newObj.mesh = MeshGenerator::createPyramid(1.0f);
-        newObj.mesh.setColor(0.7f, 0.7f, 0.7f);
-    }
-    
-    // Apply global rendering modes to new objects
-    newObj.mesh.m_showWireframe = m_globalWireframeMode;
-    newObj.mesh.m_showSolid = m_globalSolidMode;
-    
-    m_sceneObjects.push_back(newObj);
-    m_renderer->loadMesh(newObj.mesh);
 }
 
 void Application::removeObject(int objectId) {

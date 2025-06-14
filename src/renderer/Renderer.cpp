@@ -1,5 +1,6 @@
 #include "Renderer.h"
 #include "Tesselator.h"
+#include "../modeller/BREPBuilder.h"
 #include <iostream>
 #include <GL/glu.h>
 #include <glm/gtc/matrix_transform.hpp>
@@ -27,8 +28,9 @@ void Renderer::initialize() {
         return;
     }
     
-    // Create grid mesh and setup its buffers
-    m_gridMesh = MeshGenerator::createGrid(20, 0.5f);
+    // Create grid mesh using BREP and tessellation
+    BREP::Solid gridSolid = BREP::BREPBuilder::createGridSolid(20, 0.5f);
+    m_gridMesh = Tessellator::tessellate(gridSolid);
     m_gridMesh.setColor(0.3f, 0.3f, 0.3f);
     m_gridMesh.setWireframeColor(0.3f, 0.3f, 0.3f);
     m_gridMesh.m_showSolid = false;  // Grid should only show wireframe

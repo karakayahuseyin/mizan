@@ -2,6 +2,7 @@
 #define TESSELLATOR_H
 
 #include "../modeller/Solid.h"
+#include "../modeller/BREPBuilder.h"
 #include <vector>
 #include <array>
 
@@ -61,14 +62,6 @@ public:
 private:
     static void processShell(const std::shared_ptr<BREP::Shell>& shell, Mesh& mesh);
     static void processFace(const std::shared_ptr<BREP::Face>& face, Mesh& mesh);
-};
-
-// Mesh generation utilities
-class MeshGenerator {
-public:
-    static Mesh createCube(float size = 1.0f);
-    static Mesh createPyramid(float size = 1.0f);
-    static Mesh createGrid(int size = 10, float spacing = 1.0f);
 };
 
 #endif

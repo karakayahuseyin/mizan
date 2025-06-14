@@ -7,6 +7,8 @@
 namespace BREP {
 
 class HalfEdge {
+    friend class BREPBuilder; // Allow BREPBuilder to access private members
+    
 private:
     static uint32_t s_nextId;
     uint32_t m_id;

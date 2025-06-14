@@ -15,10 +15,8 @@ uint32_t Face::s_nextId = 1;
 
 Face::Face(LoopPtr outerLoop) 
     : m_id(s_nextId++), m_outerLoop(outerLoop) {
-    if (outerLoop) {
-        outerLoop->setFace(std::shared_ptr<Face>(this));
-        outerLoop->setOuter(true);
-    }
+    // Don't set face reference in constructor to avoid shared_ptr issues
+    // This should be done after the Face is fully constructed and managed by shared_ptr
 }
 
 std::vector<LoopPtr> Face::getAllLoops() const {
@@ -35,15 +33,17 @@ void Face::setOuterLoop(LoopPtr loop) {
         m_outerLoop->setFace(nullptr);
     }
     m_outerLoop = loop;
-    if (loop) {
-        loop->setFace(std::shared_ptr<Face>(this));
-        loop->setOuter(true);
-    }
+    // Don't set face reference here to avoid shared_ptr issues
+    // if (loop) {
+    //     loop->setFace(std::shared_ptr<Face>(this));
+    //     loop->setOuter(true);
+    // }
 }
 
 void Face::addInnerLoop(LoopPtr loop) {
     if (loop) {
-        loop->setFace(std::shared_ptr<Face>(this));
+        // Don't set face reference here to avoid shared_ptr issues
+        // loop->setFace(std::shared_ptr<Face>(this));
         loop->setOuter(false);
         m_innerLoops.push_back(loop);
     }

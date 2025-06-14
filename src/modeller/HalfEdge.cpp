@@ -10,9 +10,8 @@ uint32_t HalfEdge::s_nextId = 1;
 
 HalfEdge::HalfEdge(VertexPtr origin) 
     : m_id(s_nextId++), m_origin(origin) {
-    if (origin) {
-        origin->addOutgoingHalfEdge(std::shared_ptr<HalfEdge>(this));
-    }
+    // Don't add to vertex's half-edge list in constructor
+    // This should be done after the HalfEdge is fully constructed and managed by shared_ptr
 }
 
 VertexPtr HalfEdge::getDestination() const {
@@ -24,33 +23,36 @@ VertexPtr HalfEdge::getDestination() const {
 
 void HalfEdge::setOrigin(VertexPtr origin) {
     if (m_origin) {
-        m_origin->removeOutgoingHalfEdge(std::shared_ptr<HalfEdge>(this));
+        // Don't remove from vertex's half-edge list to avoid shared_ptr issues
+        // m_origin->removeOutgoingHalfEdge(std::shared_ptr<HalfEdge>(this));
     }
     m_origin = origin;
     if (origin) {
-        origin->addOutgoingHalfEdge(std::shared_ptr<HalfEdge>(this));
+        // Don't add to vertex's half-edge list to avoid shared_ptr issues
+        // origin->addOutgoingHalfEdge(std::shared_ptr<HalfEdge>(this));
     }
 }
 
 void HalfEdge::setTwin(HalfEdgePtr twin) {
     m_twin = twin;
-    if (twin && twin->getTwin().get() != this) {
-        twin->m_twin = std::shared_ptr<HalfEdge>(this);
-    }
+    // Remove the problematic reciprocal assignment to avoid circular shared_ptr issues
+    // The twin relationship should be set up externally after both half-edges are created
 }
 
 void HalfEdge::setNext(HalfEdgePtr next) {
     m_next = next;
-    if (next && next->getPrev().get() != this) {
-        next->m_prev = std::shared_ptr<HalfEdge>(this);
-    }
+    // Don't set reciprocal relationship to avoid shared_ptr issues
+    // if (next && next->getPrev().get() != this) {
+    //     next->m_prev = std::shared_ptr<HalfEdge>(this);
+    // }
 }
 
 void HalfEdge::setPrev(HalfEdgePtr prev) {
     m_prev = prev;
-    if (prev && prev->getNext().get() != this) {
-        prev->m_next = std::shared_ptr<HalfEdge>(this);
-    }
+    // Don't set reciprocal relationship to avoid shared_ptr issues
+    // if (prev && prev->getNext().get() != this) {
+    //     prev->m_next = std::shared_ptr<HalfEdge>(this);
+    // }
 }
 
 void HalfEdge::setEdge(EdgePtr edge) {

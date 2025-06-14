@@ -10,12 +10,8 @@ uint32_t Edge::s_nextId = 1;
 
 Edge::Edge(HalfEdgePtr he1, HalfEdgePtr he2) 
     : m_id(s_nextId++), m_halfEdge1(he1), m_halfEdge2(he2) {
-    if (he1) {
-        he1->setEdge(std::shared_ptr<Edge>(this));
-    }
-    if (he2) {
-        he2->setEdge(std::shared_ptr<Edge>(this));
-    }
+    // Don't set edge reference in constructor to avoid shared_ptr issues
+    // This should be done after the Edge is fully constructed and managed by shared_ptr
 }
 
 std::pair<HalfEdgePtr, HalfEdgePtr> Edge::getHalfEdges() const {

@@ -34,6 +34,7 @@ add_executable(${PROJECT_NAME}
     src/modeller/Loop.cpp 
     src/modeller/Shell.cpp 
     src/modeller/Solid.cpp
+    src/modeller/BREPBuilder.cpp
     src/renderer/Tesselator.cpp
     src/renderer/Renderer.cpp
     src/renderer/VertexArray.cpp

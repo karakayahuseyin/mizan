@@ -22,17 +22,15 @@ Shell::Shell(bool isOuter)
 Shell::Shell(const std::vector<FacePtr>& faces, bool isOuter) 
     : m_id(s_nextId++), m_faces(faces), m_isOuter(isOuter) {
     // Set shell reference for all faces
-    for (auto& face : m_faces) {
-        if (face) {
-            face->setShell(std::shared_ptr<Shell>(this));
-        }
-    }
+    // Note: Cannot set shell reference in constructor as shared_from_this() is not available yet
+    // This should be done after the Shell is fully constructed and managed by shared_ptr
 }
 
 void Shell::addFace(FacePtr face) {
     if (face && !containsFace(face)) {
         m_faces.push_back(face);
-        face->setShell(std::shared_ptr<Shell>(this));
+        // Don't set shell reference here to avoid shared_ptr issues
+        // face->setShell(std::shared_ptr<Shell>(this));
     }
 }
 
