@@ -167,6 +167,188 @@ Solid BREPBuilder::createGridSolid(int size, float spacing) {
     return solid;
 }
 
+Solid BREPBuilder::createCylinderSolid(float radius, float height, int segments) {
+    Solid solid;
+    float halfHeight = height * 0.5f;
+    
+    // Create vertices
+    std::vector<VertexPtr> vertices;
+    
+    // Bottom center
+    vertices.push_back(std::make_shared<Vertex>(glm::vec3(0.0f, -halfHeight, 0.0f)));
+    
+    // Bottom ring
+    for (int i = 0; i < segments; ++i) {
+        float angle = 2.0f * M_PI * i / segments;
+        float x = radius * cos(angle);
+        float z = radius * sin(angle);
+        vertices.push_back(std::make_shared<Vertex>(glm::vec3(x, -halfHeight, z)));
+    }
+    
+    // Top ring
+    for (int i = 0; i < segments; ++i) {
+        float angle = 2.0f * M_PI * i / segments;
+        float x = radius * cos(angle);
+        float z = radius * sin(angle);
+        vertices.push_back(std::make_shared<Vertex>(glm::vec3(x, halfHeight, z)));
+    }
+    
+    // Top center
+    vertices.push_back(std::make_shared<Vertex>(glm::vec3(0.0f, halfHeight, 0.0f)));
+    
+    // Create shell
+    auto shell = std::make_shared<Shell>();
+    
+    // Create bottom cap (counter-clockwise when viewed from below)
+    for (int i = 0; i < segments; ++i) {
+        int next = (i + 1) % segments;
+        std::vector<VertexPtr> triVertices = {
+            vertices[0],                // bottom center
+            vertices[1 + i],            // current bottom vertex
+            vertices[1 + next]          // next bottom vertex
+        };
+        auto loop = createSimpleLoop(triVertices);
+        auto face = std::make_shared<Face>(loop);
+        shell->addFace(face);
+    }
+    
+    // Create side faces (counter-clockwise when viewed from outside)
+    for (int i = 0; i < segments; ++i) {
+        int next = (i + 1) % segments;
+        int bottomCurrent = 1 + i;
+        int bottomNext = 1 + next;
+        int topCurrent = 1 + segments + i;
+        int topNext = 1 + segments + next;
+        
+        // First triangle (bottom-left, top-left, bottom-right)
+        std::vector<VertexPtr> tri1Vertices = {
+            vertices[bottomCurrent],
+            vertices[topCurrent],
+            vertices[bottomNext]
+        };
+        auto loop1 = createSimpleLoop(tri1Vertices);
+        auto face1 = std::make_shared<Face>(loop1);
+        shell->addFace(face1);
+        
+        // Second triangle (bottom-right, top-left, top-right)
+        std::vector<VertexPtr> tri2Vertices = {
+            vertices[bottomNext],
+            vertices[topCurrent],
+            vertices[topNext]
+        };
+        auto loop2 = createSimpleLoop(tri2Vertices);
+        auto face2 = std::make_shared<Face>(loop2);
+        shell->addFace(face2);
+    }
+    
+    // Create top cap (counter-clockwise when viewed from above)
+    int topCenterIndex = vertices.size() - 1;
+    for (int i = 0; i < segments; ++i) {
+        int next = (i + 1) % segments;
+        std::vector<VertexPtr> triVertices = {
+            vertices[topCenterIndex],       // top center
+            vertices[1 + segments + next],  // next top vertex
+            vertices[1 + segments + i]      // current top vertex
+        };
+        auto loop = createSimpleLoop(triVertices);
+        auto face = std::make_shared<Face>(loop);
+        shell->addFace(face);
+    }
+    
+    solid.addShell(shell);
+    return solid;
+}
+
+Solid BREPBuilder::createSphereSolid(float radius, int latitudeSegments, int longitudeSegments) {
+    Solid solid;
+    
+    // Create vertices
+    std::vector<VertexPtr> vertices;
+    
+    // Add top pole
+    vertices.push_back(std::make_shared<Vertex>(glm::vec3(0.0f, radius, 0.0f)));
+    
+    // Add latitude rings
+    for (int lat = 1; lat < latitudeSegments; ++lat) {
+        float theta = M_PI * lat / latitudeSegments;
+        float y = radius * cos(theta);
+        float ringRadius = radius * sin(theta);
+        
+        for (int lon = 0; lon < longitudeSegments; ++lon) {
+            float phi = 2.0f * M_PI * lon / longitudeSegments;
+            float x = ringRadius * cos(phi);
+            float z = ringRadius * sin(phi);
+            vertices.push_back(std::make_shared<Vertex>(glm::vec3(x, y, z)));
+        }
+    }
+    
+    // Add bottom pole
+    vertices.push_back(std::make_shared<Vertex>(glm::vec3(0.0f, -radius, 0.0f)));
+    
+    // Create shell
+    auto shell = std::make_shared<Shell>();
+    
+    // Create top cap triangles (counter-clockwise when viewed from outside)
+    for (int lon = 0; lon < longitudeSegments; ++lon) {
+        int next = (lon + 1) % longitudeSegments;
+        std::vector<VertexPtr> triVertices = {
+            vertices[0],                    // top pole
+            vertices[1 + next],             // next longitude
+            vertices[1 + lon]               // current longitude
+        };
+        auto loop = createSimpleLoop(triVertices);
+        auto face = std::make_shared<Face>(loop);
+        shell->addFace(face);
+    }
+    
+    // Create middle quads (as triangles) - counter-clockwise
+    for (int lat = 0; lat < latitudeSegments - 2; ++lat) {
+        for (int lon = 0; lon < longitudeSegments; ++lon) {
+            int next = (lon + 1) % longitudeSegments;
+            int currentRing = 1 + lat * longitudeSegments;
+            int nextRing = 1 + (lat + 1) * longitudeSegments;
+            
+            // First triangle
+            std::vector<VertexPtr> tri1Vertices = {
+                vertices[currentRing + lon],
+                vertices[currentRing + next],
+                vertices[nextRing + lon]
+            };
+            auto loop1 = createSimpleLoop(tri1Vertices);
+            auto face1 = std::make_shared<Face>(loop1);
+            shell->addFace(face1);
+            
+            // Second triangle
+            std::vector<VertexPtr> tri2Vertices = {
+                vertices[currentRing + next],
+                vertices[nextRing + next],
+                vertices[nextRing + lon]
+            };
+            auto loop2 = createSimpleLoop(tri2Vertices);
+            auto face2 = std::make_shared<Face>(loop2);
+            shell->addFace(face2);
+        }
+    }
+    
+    // Create bottom cap triangles (counter-clockwise when viewed from outside)
+    int bottomPoleIndex = vertices.size() - 1;
+    int lastRingStart = 1 + (latitudeSegments - 2) * longitudeSegments;
+    for (int lon = 0; lon < longitudeSegments; ++lon) {
+        int next = (lon + 1) % longitudeSegments;
+        std::vector<VertexPtr> triVertices = {
+            vertices[bottomPoleIndex],      // bottom pole
+            vertices[lastRingStart + lon],  // current longitude
+            vertices[lastRingStart + next]  // next longitude
+        };
+        auto loop = createSimpleLoop(triVertices);
+        auto face = std::make_shared<Face>(loop);
+        shell->addFace(face);
+    }
+    
+    solid.addShell(shell);
+    return solid;
+}
+
 LoopPtr BREPBuilder::createSimpleLoop(const std::vector<VertexPtr>& vertices) {
     if (vertices.size() < 3) {
         return nullptr;

@@ -9,6 +9,8 @@ class BREPBuilder {
 public:
     static Solid createCubeSolid(float size = 1.0f);
     static Solid createPyramidSolid(float size = 1.0f);
+    static Solid createSphereSolid(float radius = 1.0f, int latitudeSegments = 16, int longitudeSegments = 32);
+    static Solid createCylinderSolid(float radius = 1.0f, float height = 2.0f, int segments = 16);
     static Solid createGridSolid(int size = 10, float spacing = 1.0f);
 
 private:

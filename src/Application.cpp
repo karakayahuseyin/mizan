@@ -146,7 +146,7 @@ void Application::createTestMesh() {
     BREP::Solid cubeSolid = BREP::BREPBuilder::createCubeSolid(1.0f);
     cubeObj.mesh = Tessellator::tessellate(cubeSolid);
     cubeObj.mesh.setColor(1.0f, 0.0f, 0.0f);
-    cubeObj.mesh.setPosition(-2.0f, 1.0f, 0.0f);
+    cubeObj.mesh.setPosition(-3.0f, 1.0f, 0.0f);
     cubeObj.mesh.m_showSolid = m_globalSolidMode;
     cubeObj.mesh.m_showWireframe = m_globalWireframeMode;
     cubeObj.name = "Cube 1";
@@ -159,7 +159,7 @@ void Application::createTestMesh() {
     BREP::Solid pyramidSolid = BREP::BREPBuilder::createPyramidSolid(1.5f);
     pyramidObj.mesh = Tessellator::tessellate(pyramidSolid);
     pyramidObj.mesh.setColor(0.0f, 1.0f, 0.0f);
-    pyramidObj.mesh.setPosition(2.0f, 0.0f, 0.0f);
+    pyramidObj.mesh.setPosition(-1.0f, 0.0f, 0.0f);
     pyramidObj.mesh.m_showSolid = m_globalSolidMode;
     pyramidObj.mesh.m_showWireframe = m_globalWireframeMode;
     pyramidObj.name = "Pyramid 1";
@@ -167,11 +167,37 @@ void Application::createTestMesh() {
     m_sceneObjects.push_back(pyramidObj);
     m_renderer->loadMesh(pyramidObj.mesh);
     
+    // Create sphere using BREP
+    SceneObject sphereObj;
+    BREP::Solid sphereSolid = BREP::BREPBuilder::createSphereSolid(0.7f, 12, 24);
+    sphereObj.mesh = Tessellator::tessellate(sphereSolid);
+    sphereObj.mesh.setColor(0.0f, 0.0f, 1.0f);
+    sphereObj.mesh.setPosition(1.0f, 0.7f, 0.0f);
+    sphereObj.mesh.m_showSolid = m_globalSolidMode;
+    sphereObj.mesh.m_showWireframe = m_globalWireframeMode;
+    sphereObj.name = "Sphere 1";
+    sphereObj.id = m_nextObjectId++;
+    m_sceneObjects.push_back(sphereObj);
+    m_renderer->loadMesh(sphereObj.mesh);
+    
+    // Create cylinder using BREP
+    SceneObject cylinderObj;
+    BREP::Solid cylinderSolid = BREP::BREPBuilder::createCylinderSolid(0.5f, 1.2f, 16);
+    cylinderObj.mesh = Tessellator::tessellate(cylinderSolid);
+    cylinderObj.mesh.setColor(1.0f, 1.0f, 0.0f);
+    cylinderObj.mesh.setPosition(3.0f, 0.6f, 0.0f);
+    cylinderObj.mesh.m_showSolid = m_globalSolidMode;
+    cylinderObj.mesh.m_showWireframe = m_globalWireframeMode;
+    cylinderObj.name = "Cylinder 1";
+    cylinderObj.id = m_nextObjectId++;
+    m_sceneObjects.push_back(cylinderObj);
+    m_renderer->loadMesh(cylinderObj.mesh);
+    
     // Create another cube using BREP
     SceneObject cube2Obj;
     BREP::Solid cube2Solid = BREP::BREPBuilder::createCubeSolid(0.8f);
     cube2Obj.mesh = Tessellator::tessellate(cube2Solid);
-    cube2Obj.mesh.setColor(0.0f, 0.0f, 1.0f);
+    cube2Obj.mesh.setColor(1.0f, 0.0f, 1.0f);
     cube2Obj.mesh.setPosition(0.0f, 0.5f, 2.0f);
     cube2Obj.mesh.m_showSolid = m_globalSolidMode;
     cube2Obj.mesh.m_showWireframe = m_globalWireframeMode;
@@ -193,6 +219,14 @@ void Application::addObject(const std::string& type) {
     } else if (type == "Pyramid") {
         BREP::Solid pyramidSolid = BREP::BREPBuilder::createPyramidSolid(1.0f);
         newObj.mesh = Tessellator::tessellate(pyramidSolid);
+        newObj.mesh.setColor(0.7f, 0.7f, 0.7f);
+    } else if (type == "Sphere") {
+        BREP::Solid sphereSolid = BREP::BREPBuilder::createSphereSolid(1.0f, 12, 24);
+        newObj.mesh = Tessellator::tessellate(sphereSolid);
+        newObj.mesh.setColor(0.7f, 0.7f, 0.7f);
+    } else if (type == "Cylinder") {
+        BREP::Solid cylinderSolid = BREP::BREPBuilder::createCylinderSolid(1.0f, 2.0f, 16);
+        newObj.mesh = Tessellator::tessellate(cylinderSolid);
         newObj.mesh.setColor(0.7f, 0.7f, 0.7f);
     }
     
@@ -284,6 +318,12 @@ void Application::renderMainMenuBar() {
             }
             if (ImGui::MenuItem("Pyramid")) {
                 addObject("Pyramid");
+            }
+            if (ImGui::MenuItem("Sphere")) {
+                addObject("Sphere");
+            }
+            if (ImGui::MenuItem("Cylinder")) {
+                addObject("Cylinder");
             }
             ImGui::EndMenu();
         }

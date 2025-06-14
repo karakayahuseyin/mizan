@@ -36,22 +36,26 @@ void Tessellator::processFace(const std::shared_ptr<BREP::Face>& face, Mesh& mes
         return; // Not enough vertices for a face
     }
     
-    // Calculate face normal using first three vertices
-    std::array<float, 3> normal = {0.0f, 0.0f, 0.0f};
+    // Calculate face normal using first three vertices with proper cross product
+    std::array<float, 3> faceNormal = {0.0f, 0.0f, 1.0f};
     if (vertices.size() >= 3) {
-        auto v1 = vertices[1]->getPosition() - vertices[0]->getPosition();
-        auto v2 = vertices[2]->getPosition() - vertices[0]->getPosition();
+        auto pos0 = vertices[0]->getPosition();
+        auto pos1 = vertices[1]->getPosition();
+        auto pos2 = vertices[2]->getPosition();
         
-        normal[0] = v1.y * v2.z - v1.z * v2.y;
-        normal[1] = v1.z * v2.x - v1.x * v2.z;
-        normal[2] = v1.x * v2.y - v1.y * v2.x;
+        auto v1 = pos1 - pos0;
+        auto v2 = pos2 - pos0;
+        
+        // Cross product: v1 × v2
+        glm::vec3 normal = glm::cross(v1, v2);
         
         // Normalize
-        float length = std::sqrt(normal[0] * normal[0] + normal[1] * normal[1] + normal[2] * normal[2]);
+        float length = glm::length(normal);
         if (length > 0.0f) {
-            normal[0] /= length;
-            normal[1] /= length;
-            normal[2] /= length;
+            normal = normal / length;
+            faceNormal[0] = normal.x;
+            faceNormal[1] = normal.y;
+            faceNormal[2] = normal.z;
         }
     }
     
@@ -63,7 +67,32 @@ void Tessellator::processFace(const std::shared_ptr<BREP::Face>& face, Mesh& mes
         RenderVertex renderVertex;
         auto pos = vertex->getPosition();
         renderVertex.position = {{static_cast<float>(pos.x), static_cast<float>(pos.y), static_cast<float>(pos.z)}};
-        renderVertex.normal = normal;
+        
+        // For spherical objects, use position as normal (after normalization)
+        // Check if this vertex is likely from a sphere by checking distance from origin
+        float distFromOrigin = glm::length(pos);
+        if (distFromOrigin > 0.01f) { // Not at origin
+            // Check if all vertices are roughly equidistant from origin (sphere-like)
+            bool isSpherelike = true;
+            float firstDist = glm::length(vertices[0]->getPosition());
+            for (const auto& v : vertices) {
+                float dist = glm::length(v->getPosition());
+                if (std::abs(dist - firstDist) > 0.1f) { // Allow some tolerance
+                    isSpherelike = false;
+                    break;
+                }
+            }
+            
+            if (isSpherelike && vertices.size() == 3) { // Spherical triangle
+                glm::vec3 vertexNormal = glm::normalize(pos);
+                renderVertex.normal = {{vertexNormal.x, vertexNormal.y, vertexNormal.z}};
+            } else {
+                renderVertex.normal = faceNormal;
+            }
+        } else {
+            renderVertex.normal = faceNormal;
+        }
+        
         mesh.m_vertices.push_back(renderVertex);
     }
     

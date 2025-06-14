@@ -135,9 +135,13 @@ void Renderer::renderSolid(const Mesh& mesh, GLuint vbo, GLuint ebo) {
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    glFrontFace(GL_CCW);
+    
+    // Temporarily disable face culling to see all faces
+    glDisable(GL_CULL_FACE);
+    // glEnable(GL_CULL_FACE);
+    // glCullFace(GL_BACK);
+    // glFrontFace(GL_CCW);
+    
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
     
     // Clear any errors
@@ -182,6 +186,9 @@ void Renderer::renderSolid(const Mesh& mesh, GLuint vbo, GLuint ebo) {
     
     m_vertexArray->unbind();
     m_basicShader->unuse();
+    
+    // Re-enable face culling for wireframe rendering
+    glEnable(GL_CULL_FACE);
 }
 
 void Renderer::renderWireframe(const Mesh& mesh, GLuint wireframeVbo, GLuint wireframeEbo) {
