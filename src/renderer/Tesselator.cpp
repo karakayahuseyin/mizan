@@ -103,6 +103,14 @@ void Mesh::setWireframeColor(float r, float g, float b) {
     m_wireframeColor[2] = b;
 }
 
+void Mesh::setSelected(bool selected) {
+    m_isSelected = selected;
+}
+
+std::array<float, 3> Mesh::getCurrentWireframeColor() const {
+    return m_isSelected ? m_selectedWireframeColor : m_wireframeColor;
+}
+
 // Static helper functions for creating 3D meshes
 Mesh MeshGenerator::createCube(float size) {
     Mesh mesh;

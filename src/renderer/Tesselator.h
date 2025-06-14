@@ -30,6 +30,10 @@ public:
     bool m_showSolid = true;
     std::array<float, 3> m_wireframeColor = {1.0f, 1.0f, 1.0f}; // White edges
     
+    // Selection state
+    bool m_isSelected = false;
+    std::array<float, 3> m_selectedWireframeColor = {1.0f, 1.0f, 0.0f}; // Yellow for selection
+    
     void clear();
     size_t getVertexCount() const { return m_vertices.size(); }
     size_t getTriangleCount() const { return m_triangles.size(); }
@@ -39,6 +43,9 @@ public:
     void setPosition(float x, float y, float z);
     void setScale(float x, float y, float z);
     void setWireframeColor(float r, float g, float b);
+    void setSelected(bool selected);
+    bool isSelected() const { return m_isSelected; }
+    std::array<float, 3> getCurrentWireframeColor() const;
     
     // Edge extraction for wireframe
     std::vector<std::pair<unsigned int, unsigned int>> getEdges() const;

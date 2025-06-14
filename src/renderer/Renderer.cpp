@@ -140,8 +140,9 @@ void Renderer::renderSolid(const Mesh& mesh, GLuint vbo, GLuint ebo) {
 }
 
 void Renderer::renderWireframe(const Mesh& mesh, GLuint wireframeVbo, GLuint wireframeEbo) {
-    // Set wireframe color
-    glColor3f(mesh.m_wireframeColor[0], mesh.m_wireframeColor[1], mesh.m_wireframeColor[2]);
+    // Set wireframe color (yellow if selected, normal color otherwise)
+    auto wireframeColor = mesh.getCurrentWireframeColor();
+    glColor3f(wireframeColor[0], wireframeColor[1], wireframeColor[2]);
     
     // Disable lighting for wireframe
     glDisable(GL_LIGHTING);

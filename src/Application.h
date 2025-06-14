@@ -43,6 +43,14 @@ private:
     bool m_isRotating = false;
     bool m_isPanning = false;
 
+    // Mouse interaction
+    void handleMouseClick(double x, double y);
+    int performRaycast(double mouseX, double mouseY);
+    bool rayIntersectsTriangle(const glm::vec3& rayOrigin, const glm::vec3& rayDir, 
+                              const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
+                              float& distance);
+    glm::vec3 screenToWorldRay(double mouseX, double mouseY);
+
 public:
     Application();
     ~Application();

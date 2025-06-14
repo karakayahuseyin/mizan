@@ -239,7 +239,20 @@ void Application::removeObject(int objectId) {
 }
 
 void Application::selectObject(int objectId) {
+    // Deselect all objects first
+    for (auto& obj : m_sceneObjects) {
+        obj.mesh.setSelected(false);
+    }
+    
     m_selectedObjectId = objectId;
+    
+    // Select the new object
+    SceneObject* selectedObj = getSelectedObject();
+    if (selectedObj) {
+        selectedObj->mesh.setSelected(true);
+    }
+    
+    syncMeshesToRenderer();
 }
 
 SceneObject* Application::getSelectedObject() {
@@ -503,10 +516,21 @@ void Application::handleMouseInput() {
     double deltaX, deltaY;
     m_window->getMouseDelta(deltaX, deltaY);
     
-    // Left mouse button - rotate camera
-    if (m_window->isMouseButtonPressed(0)) { // Left button
+    // Handle mouse clicks for object selection
+    static bool leftButtonWasPressed = false;
+    bool leftButtonPressed = m_window->isMouseButtonPressed(0);
+    
+    if (leftButtonPressed && !leftButtonWasPressed) {
+        // Mouse button just pressed - record position
+        double mouseX, mouseY;
+        m_window->getMousePosition(mouseX, mouseY);
+        handleMouseClick(mouseX, mouseY);
+    } else if (leftButtonPressed) {
+        // Mouse button held - rotate camera
         m_camera->rotate(deltaX * 0.5f, deltaY * 0.5f);
     }
+    
+    leftButtonWasPressed = leftButtonPressed;
     
     // Right mouse button - pan camera
     if (m_window->isMouseButtonPressed(1)) { // Right button
@@ -518,4 +542,126 @@ void Application::handleMouseInput() {
     if (scrollDelta != 0.0) {
         m_camera->zoom(-scrollDelta * 0.1f); // Negative for natural zoom direction
     }
+}
+
+void Application::handleMouseClick(double x, double y) {
+    // Perform raycast to find clicked object
+    int clickedObjectIndex = performRaycast(x, y);
+    
+    if (clickedObjectIndex >= 0 && clickedObjectIndex < static_cast<int>(m_sceneObjects.size())) {
+        selectObject(m_sceneObjects[clickedObjectIndex].id);
+    } else {
+        // Clicked on empty space - deselect all
+        selectObject(-1);
+    }
+}
+
+int Application::performRaycast(double mouseX, double mouseY) {
+    // Convert screen coordinates to world ray
+    glm::vec3 rayOrigin = m_camera->getPosition();
+    glm::vec3 rayDir = screenToWorldRay(mouseX, mouseY);
+    
+    float closestDistance = std::numeric_limits<float>::max();
+    int closestObjectIndex = -1;
+    
+    // Test ray against all objects
+    for (size_t objIndex = 0; objIndex < m_sceneObjects.size(); ++objIndex) {
+        const auto& obj = m_sceneObjects[objIndex];
+        const auto& mesh = obj.mesh;
+        
+        // Transform ray to object space
+        glm::mat4 modelMatrix = glm::mat4(1.0f);
+        modelMatrix = glm::translate(modelMatrix, glm::vec3(mesh.m_position[0], mesh.m_position[1], mesh.m_position[2]));
+        modelMatrix = glm::rotate(modelMatrix, glm::radians(mesh.m_rotation[0]), glm::vec3(1, 0, 0));
+        modelMatrix = glm::rotate(modelMatrix, glm::radians(mesh.m_rotation[1]), glm::vec3(0, 1, 0));
+        modelMatrix = glm::rotate(modelMatrix, glm::radians(mesh.m_rotation[2]), glm::vec3(0, 0, 1));
+        modelMatrix = glm::scale(modelMatrix, glm::vec3(mesh.m_scale[0], mesh.m_scale[1], mesh.m_scale[2]));
+        
+        glm::mat4 invModelMatrix = glm::inverse(modelMatrix);
+        glm::vec3 localRayOrigin = glm::vec3(invModelMatrix * glm::vec4(rayOrigin, 1.0f));
+        glm::vec3 localRayDir = glm::normalize(glm::vec3(invModelMatrix * glm::vec4(rayDir, 0.0f)));
+        
+        // Test ray against all triangles in the mesh
+        for (const auto& triangle : mesh.m_triangles) {
+            const auto& v0 = mesh.m_vertices[triangle.indices[0]].position;
+            const auto& v1 = mesh.m_vertices[triangle.indices[1]].position;
+            const auto& v2 = mesh.m_vertices[triangle.indices[2]].position;
+            
+            glm::vec3 vert0(v0[0], v0[1], v0[2]);
+            glm::vec3 vert1(v1[0], v1[1], v1[2]);
+            glm::vec3 vert2(v2[0], v2[1], v2[2]);
+            
+            float distance;
+            if (rayIntersectsTriangle(localRayOrigin, localRayDir, vert0, vert1, vert2, distance)) {
+                if (distance < closestDistance && distance > 0.0f) {
+                    closestDistance = distance;
+                    closestObjectIndex = static_cast<int>(objIndex);
+                }
+            }
+        }
+    }
+    
+    return closestObjectIndex;
+}
+
+bool Application::rayIntersectsTriangle(const glm::vec3& rayOrigin, const glm::vec3& rayDir, 
+                                       const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
+                                       float& distance) {
+    const float EPSILON = 0.0000001f;
+    
+    glm::vec3 edge1 = v1 - v0;
+    glm::vec3 edge2 = v2 - v0;
+    glm::vec3 h = glm::cross(rayDir, edge2);
+    float a = glm::dot(edge1, h);
+    
+    if (a > -EPSILON && a < EPSILON) {
+        return false; // Ray is parallel to triangle
+    }
+    
+    float f = 1.0f / a;
+    glm::vec3 s = rayOrigin - v0;
+    float u = f * glm::dot(s, h);
+    
+    if (u < 0.0f || u > 1.0f) {
+        return false;
+    }
+    
+    glm::vec3 q = glm::cross(s, edge1);
+    float v = f * glm::dot(rayDir, q);
+    
+    if (v < 0.0f || u + v > 1.0f) {
+        return false;
+    }
+    
+    float t = f * glm::dot(edge2, q);
+    
+    if (t > EPSILON) {
+        distance = t;
+        return true;
+    }
+    
+    return false;
+}
+
+glm::vec3 Application::screenToWorldRay(double mouseX, double mouseY) {
+    // Get viewport dimensions
+    int viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    
+    // Convert mouse coordinates to normalized device coordinates
+    float x = (2.0f * mouseX) / viewport[2] - 1.0f;
+    float y = 1.0f - (2.0f * mouseY) / viewport[3];
+    
+    // Get projection and view matrices
+    glm::mat4 projMatrix = m_camera->getProjectionMatrix();
+    glm::mat4 viewMatrix = m_camera->getViewMatrix();
+    
+    // Calculate ray direction in world space
+    glm::mat4 invProjView = glm::inverse(projMatrix * viewMatrix);
+    glm::vec4 rayClip = glm::vec4(x, y, -1.0f, 1.0f);
+    glm::vec4 rayEye = glm::inverse(projMatrix) * rayClip;
+    rayEye = glm::vec4(rayEye.x, rayEye.y, -1.0f, 0.0f);
+    glm::vec4 rayWorld = glm::inverse(viewMatrix) * rayEye;
+    
+    return glm::normalize(glm::vec3(rayWorld));
 }
