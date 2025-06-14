@@ -12,6 +12,9 @@ struct RenderVertex {
 
 struct Triangle {
     std::array<unsigned int, 3> indices;
+    
+    Triangle() = default;
+    Triangle(unsigned int i0, unsigned int i1, unsigned int i2) : indices{{i0, i1, i2}} {}
 };
 
 class Mesh {

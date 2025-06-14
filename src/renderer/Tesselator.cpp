@@ -4,6 +4,8 @@
 #include "../modeller/Vertex.h"
 #include <cmath>
 #include <set>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 void Mesh::clear() {
     m_vertices.clear();
@@ -180,31 +182,167 @@ Mesh MeshGenerator::createPyramid(float size) {
     float half = size * 0.5f;
     float height = size * 0.8f;
     
-    // Define pyramid vertices
-    RenderVertex vertices[5] = {
-        // Base vertices
-        {{-half, 0, -half}, {0, -1, 0}},
-        {{ half, 0, -half}, {0, -1, 0}},
-        {{ half, 0,  half}, {0, -1, 0}},
-        {{-half, 0,  half}, {0, -1, 0}},
-        // Apex
-        {{0, height, 0}, {0, 1, 0}}
-    };
+    // We'll create separate vertices for each face with their own normals
+    // This avoids normal interpolation issues at shared edges
     
-    for (int i = 0; i < 5; ++i) {
-        mesh.m_vertices.push_back(vertices[i]);
+    // 1. Create the base (bottom face) - 4 vertices + 2 triangles
+    unsigned int baseStart = 0;
+    std::array<float, 3> baseNormal = {0.0f, -1.0f, 0.0f};
+    
+    // Base vertices (counter-clockwise when viewed from below)
+    RenderVertex v0, v1, v2, v3;
+    v0.position = {-half, 0.0f, -half};  // back-left
+    v1.position = { half, 0.0f, -half};  // back-right
+    v2.position = { half, 0.0f,  half};  // front-right
+    v3.position = {-half, 0.0f,  half};  // front-left
+    
+    // All base vertices have same normal (pointing down)
+    v0.normal = baseNormal;
+    v1.normal = baseNormal;
+    v2.normal = baseNormal;
+    v3.normal = baseNormal;
+    
+    mesh.m_vertices.push_back(v0);
+    mesh.m_vertices.push_back(v1);
+    mesh.m_vertices.push_back(v2);
+    mesh.m_vertices.push_back(v3);
+    
+    // Base triangles (counter-clockwise when viewed from below)
+    mesh.m_triangles.push_back(Triangle(0, 1, 2));
+    mesh.m_triangles.push_back(Triangle(0, 2, 3));
+    
+    // 2. Create each side face with its own vertices and correct normals
+    // Each face has 3 vertices (2 from base + apex) and one triangle
+    
+    // Apex position
+    std::array<float, 3> apexPos = {0.0f, height, 0.0f};
+    
+    // Front face
+    unsigned int frontStart = mesh.m_vertices.size();
+    {
+        // Calculate normal for front face (using cross product)
+        glm::vec3 edge1(v2.position[0] - v3.position[0], 
+                        v2.position[1] - v3.position[1], 
+                        v2.position[2] - v3.position[2]);
+        glm::vec3 edge2(apexPos[0] - v3.position[0], 
+                        apexPos[1] - v3.position[1], 
+                        apexPos[2] - v3.position[2]);
+        glm::vec3 normal = glm::normalize(glm::cross(edge1, edge2));
+        std::array<float, 3> frontNormal = {normal.x, normal.y, normal.z};
+        
+        // Create vertices with this normal
+        RenderVertex fv0, fv1, fv2;
+        fv0.position = v3.position;  // front-left
+        fv0.normal = frontNormal;
+        
+        fv1.position = v2.position;  // front-right
+        fv1.normal = frontNormal;
+        
+        fv2.position = apexPos;      // apex
+        fv2.normal = frontNormal;
+        
+        mesh.m_vertices.push_back(fv0);
+        mesh.m_vertices.push_back(fv1);
+        mesh.m_vertices.push_back(fv2);
+        
+        // Add triangle (counter-clockwise)
+        mesh.m_triangles.push_back(Triangle(frontStart, frontStart + 1, frontStart + 2));
     }
     
-    // Define triangles
-    Triangle triangles[6] = {
-        // Base (2 triangles)
-        {{0, 2, 1}}, {{0, 3, 2}},
-        // Sides
-        {{0, 1, 4}}, {{1, 2, 4}}, {{2, 3, 4}}, {{3, 0, 4}}
-    };
+    // Right face
+    unsigned int rightStart = mesh.m_vertices.size();
+    {
+        // Calculate normal for right face
+        glm::vec3 edge1(v1.position[0] - v2.position[0], 
+                        v1.position[1] - v2.position[1], 
+                        v1.position[2] - v2.position[2]);
+        glm::vec3 edge2(apexPos[0] - v2.position[0], 
+                        apexPos[1] - v2.position[1], 
+                        apexPos[2] - v2.position[2]);
+        glm::vec3 normal = glm::normalize(glm::cross(edge1, edge2));
+        std::array<float, 3> rightNormal = {normal.x, normal.y, normal.z};
+        
+        // Create vertices with this normal
+        RenderVertex rv0, rv1, rv2;
+        rv0.position = v2.position;  // front-right
+        rv0.normal = rightNormal;
+        
+        rv1.position = v1.position;  // back-right
+        rv1.normal = rightNormal;
+        
+        rv2.position = apexPos;      // apex
+        rv2.normal = rightNormal;
+        
+        mesh.m_vertices.push_back(rv0);
+        mesh.m_vertices.push_back(rv1);
+        mesh.m_vertices.push_back(rv2);
+        
+        // Add triangle (counter-clockwise)
+        mesh.m_triangles.push_back(Triangle(rightStart, rightStart + 1, rightStart + 2));
+    }
     
-    for (int i = 0; i < 6; ++i) {
-        mesh.m_triangles.push_back(triangles[i]);
+    // Back face
+    unsigned int backStart = mesh.m_vertices.size();
+    {
+        // Calculate normal for back face
+        glm::vec3 edge1(v0.position[0] - v1.position[0], 
+                        v0.position[1] - v1.position[1], 
+                        v0.position[2] - v1.position[2]);
+        glm::vec3 edge2(apexPos[0] - v1.position[0], 
+                        apexPos[1] - v1.position[1], 
+                        apexPos[2] - v1.position[2]);
+        glm::vec3 normal = glm::normalize(glm::cross(edge1, edge2));
+        std::array<float, 3> backNormal = {normal.x, normal.y, normal.z};
+        
+        // Create vertices with this normal
+        RenderVertex bv0, bv1, bv2;
+        bv0.position = v1.position;  // back-right
+        bv0.normal = backNormal;
+        
+        bv1.position = v0.position;  // back-left
+        bv1.normal = backNormal;
+        
+        bv2.position = apexPos;      // apex
+        bv2.normal = backNormal;
+        
+        mesh.m_vertices.push_back(bv0);
+        mesh.m_vertices.push_back(bv1);
+        mesh.m_vertices.push_back(bv2);
+        
+        // Add triangle (counter-clockwise)
+        mesh.m_triangles.push_back(Triangle(backStart, backStart + 1, backStart + 2));
+    }
+    
+    // Left face
+    unsigned int leftStart = mesh.m_vertices.size();
+    {
+        // Calculate normal for left face
+        glm::vec3 edge1(v3.position[0] - v0.position[0], 
+                        v3.position[1] - v0.position[1], 
+                        v3.position[2] - v0.position[2]);
+        glm::vec3 edge2(apexPos[0] - v0.position[0], 
+                        apexPos[1] - v0.position[1], 
+                        apexPos[2] - v0.position[2]);
+        glm::vec3 normal = glm::normalize(glm::cross(edge1, edge2));
+        std::array<float, 3> leftNormal = {normal.x, normal.y, normal.z};
+        
+        // Create vertices with this normal
+        RenderVertex lv0, lv1, lv2;
+        lv0.position = v0.position;  // back-left
+        lv0.normal = leftNormal;
+        
+        lv1.position = v3.position;  // front-left
+        lv1.normal = leftNormal;
+        
+        lv2.position = apexPos;      // apex
+        lv2.normal = leftNormal;
+        
+        mesh.m_vertices.push_back(lv0);
+        mesh.m_vertices.push_back(lv1);
+        mesh.m_vertices.push_back(lv2);
+        
+        // Add triangle (counter-clockwise)
+        mesh.m_triangles.push_back(Triangle(leftStart, leftStart + 1, leftStart + 2));
     }
     
     return mesh;
@@ -214,17 +352,35 @@ Mesh MeshGenerator::createGrid(int size, float spacing) {
     Mesh mesh;
     float halfSize = size * spacing * 0.5f;
     
-    // Create grid lines
+    // Create grid as a flat mesh with triangles
+    std::array<float, 3> normal = {0, 1, 0};
+    
+    // Generate vertices in a grid pattern
     for (int i = 0; i <= size; ++i) {
-        float pos = -halfSize + i * spacing;
-        
-        // Horizontal lines
-        mesh.m_vertices.push_back({{-halfSize, 0, pos}, {0, 1, 0}});
-        mesh.m_vertices.push_back({{ halfSize, 0, pos}, {0, 1, 0}});
-        
-        // Vertical lines
-        mesh.m_vertices.push_back({{pos, 0, -halfSize}, {0, 1, 0}});
-        mesh.m_vertices.push_back({{pos, 0,  halfSize}, {0, 1, 0}});
+        for (int j = 0; j <= size; ++j) {
+            float x = -halfSize + i * spacing;
+            float z = -halfSize + j * spacing;
+            
+            RenderVertex vertex;
+            vertex.position = {x, 0.0f, z};
+            vertex.normal = normal;
+            mesh.m_vertices.push_back(vertex);
+        }
+    }
+    
+    // Generate triangles
+    for (int i = 0; i < size; ++i) {
+        for (int j = 0; j < size; ++j) {
+            // Calculate vertex indices for the quad
+            unsigned int topLeft = i * (size + 1) + j;
+            unsigned int topRight = i * (size + 1) + (j + 1);
+            unsigned int bottomLeft = (i + 1) * (size + 1) + j;
+            unsigned int bottomRight = (i + 1) * (size + 1) + (j + 1);
+            
+            // Create two triangles for each grid cell
+            mesh.m_triangles.push_back(Triangle(topLeft, bottomLeft, topRight));
+            mesh.m_triangles.push_back(Triangle(topRight, bottomLeft, bottomRight));
+        }
     }
     
     return mesh;

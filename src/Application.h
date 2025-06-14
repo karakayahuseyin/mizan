@@ -23,6 +23,7 @@ private:
     std::unique_ptr<Camera> m_camera;
     
     std::vector<SceneObject> m_sceneObjects;
+    Mesh m_gridMesh; // Add grid mesh as a member
     int m_nextObjectId = 1;
     int m_selectedObjectId = -1;
     

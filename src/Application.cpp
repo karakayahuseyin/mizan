@@ -90,15 +90,13 @@ void Application::render() {
     }
     
     // Setup 3D view with camera
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
     auto projMatrix = m_camera->getProjectionMatrix();
-    glLoadMatrixf(&projMatrix[0][0]);
-    
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
     auto viewMatrix = m_camera->getViewMatrix();
-    glLoadMatrixf(&viewMatrix[0][0]);
+    
+    // Pass matrices to renderer
+    m_renderer->setProjectionMatrix(projMatrix);
+    m_renderer->setViewMatrix(viewMatrix);
+    m_renderer->setCameraPosition(m_camera->getPosition());
     
     // Render grid
     m_renderer->enableGrid(m_showGrid);
@@ -148,8 +146,8 @@ void Application::createTestMesh() {
     cubeObj.mesh = MeshGenerator::createCube(1.0f);
     cubeObj.mesh.setColor(1.0f, 0.0f, 0.0f);
     cubeObj.mesh.setPosition(-2.0f, 1.0f, 0.0f);
-    cubeObj.mesh.m_showSolid = true;  // Explicitly enable solid rendering
-    cubeObj.mesh.m_showWireframe = true; // Explicitly enable wireframe
+    cubeObj.mesh.m_showSolid = m_globalSolidMode;
+    cubeObj.mesh.m_showWireframe = m_globalWireframeMode;
     cubeObj.name = "Cube 1";
     cubeObj.id = m_nextObjectId++;
     m_sceneObjects.push_back(cubeObj);
@@ -160,8 +158,8 @@ void Application::createTestMesh() {
     pyramidObj.mesh = MeshGenerator::createPyramid(1.5f);
     pyramidObj.mesh.setColor(0.0f, 1.0f, 0.0f);
     pyramidObj.mesh.setPosition(2.0f, 0.0f, 0.0f);
-    pyramidObj.mesh.m_showSolid = true;  // Explicitly enable solid rendering
-    pyramidObj.mesh.m_showWireframe = true; // Explicitly enable wireframe
+    pyramidObj.mesh.m_showSolid = m_globalSolidMode;
+    pyramidObj.mesh.m_showWireframe = m_globalWireframeMode;
     pyramidObj.name = "Pyramid 1";
     pyramidObj.id = m_nextObjectId++;
     m_sceneObjects.push_back(pyramidObj);
@@ -172,8 +170,8 @@ void Application::createTestMesh() {
     cube2Obj.mesh = MeshGenerator::createCube(0.8f);
     cube2Obj.mesh.setColor(0.0f, 0.0f, 1.0f);
     cube2Obj.mesh.setPosition(0.0f, 0.5f, 2.0f);
-    cube2Obj.mesh.m_showSolid = true;  // Explicitly enable solid rendering
-    cube2Obj.mesh.m_showWireframe = true; // Explicitly enable wireframe
+    cube2Obj.mesh.m_showSolid = m_globalSolidMode;
+    cube2Obj.mesh.m_showWireframe = m_globalWireframeMode;
     cube2Obj.name = "Cube 2";
     cube2Obj.id = m_nextObjectId++;
     m_sceneObjects.push_back(cube2Obj);

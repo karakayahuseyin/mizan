@@ -38,6 +38,7 @@ add_executable(${PROJECT_NAME}
     src/renderer/Renderer.cpp
     src/renderer/VertexArray.cpp
     src/renderer/Camera.cpp
+    src/renderer/Shader.cpp
 )
 
 add_library(imgui STATIC
@@ -62,6 +63,12 @@ target_include_directories(imgui_backend PUBLIC
 )
 
 target_link_libraries(imgui_backend imgui glfw OpenGL::GL)
+
+# Copy shader files to binary directory
+configure_file(${CMAKE_SOURCE_DIR}/shaders/basic.vert ${CMAKE_BINARY_DIR}/shaders/basic.vert COPYONLY)
+configure_file(${CMAKE_SOURCE_DIR}/shaders/basic.frag ${CMAKE_BINARY_DIR}/shaders/basic.frag COPYONLY)
+configure_file(${CMAKE_SOURCE_DIR}/shaders/wireframe.vert ${CMAKE_BINARY_DIR}/shaders/wireframe.vert COPYONLY)
+configure_file(${CMAKE_SOURCE_DIR}/shaders/wireframe.frag ${CMAKE_BINARY_DIR}/shaders/wireframe.frag COPYONLY)
 
 # Link libraries
 target_link_libraries(${PROJECT_NAME}

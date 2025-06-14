@@ -2,17 +2,14 @@
 #include "Tesselator.h"
 #include <iostream>
 #include <GL/glu.h>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/matrix_inverse.hpp>
 
 Renderer::Renderer() 
     : m_vertexArray(nullptr), m_gridEnabled(true) {
     // Initialize matrices
-    for (int i = 0; i < 16; ++i) {
-        m_viewMatrix[i] = 0.0f;
-        m_projMatrix[i] = 0.0f;
-    }
-    // Set identity
-    m_viewMatrix[0] = m_viewMatrix[5] = m_viewMatrix[10] = m_viewMatrix[15] = 1.0f;
-    m_projMatrix[0] = m_projMatrix[5] = m_projMatrix[10] = m_projMatrix[15] = 1.0f;
+    m_viewMatrix = glm::mat4(1.0f);
+    m_projMatrix = glm::mat4(1.0f);
 }
 
 Renderer::~Renderer() {
@@ -24,28 +21,45 @@ void Renderer::initialize() {
     
     m_vertexArray = std::make_unique<VertexArray>();
     
-    // Create grid mesh
+    // Initialize shaders
+    if (!initializeShaders()) {
+        std::cerr << "Failed to initialize shaders!" << std::endl;
+        return;
+    }
+    
+    // Create grid mesh and setup its buffers
     m_gridMesh = MeshGenerator::createGrid(20, 0.5f);
     m_gridMesh.setColor(0.3f, 0.3f, 0.3f);
+    m_gridMesh.setWireframeColor(0.3f, 0.3f, 0.3f);
+    m_gridMesh.m_showSolid = false;  // Grid should only show wireframe
+    m_gridMesh.m_showWireframe = true;
     
-    // Set up basic lighting
-    glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
+    // Setup grid buffers
+    GLuint gridVbo, gridEbo, gridWireframeVbo, gridWireframeEbo;
+    setupMeshBuffers(m_gridMesh, gridVbo, gridEbo, gridWireframeVbo, gridWireframeEbo);
+    m_vbos.insert(m_vbos.begin(), gridVbo);
+    m_ebos.insert(m_ebos.begin(), gridEbo);
+    m_wireframeVbos.insert(m_wireframeVbos.begin(), gridWireframeVbo);
+    m_wireframeEbos.insert(m_wireframeEbos.begin(), gridWireframeEbo);
     
-    // Set up light properties
-    GLfloat lightPos[] = {5.0f, 5.0f, 5.0f, 1.0f};
-    GLfloat lightAmbient[] = {0.3f, 0.3f, 0.3f, 1.0f};
-    GLfloat lightDiffuse[] = {0.8f, 0.8f, 0.8f, 1.0f};
-    GLfloat lightSpecular[] = {1.0f, 1.0f, 1.0f, 1.0f};
+    // Initialize lighting
+    m_lightPos = glm::vec3(5.0f, 5.0f, 5.0f);
+    m_lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+    m_cameraPos = glm::vec3(0.0f, 0.0f, 5.0f);
     
-    glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
-    glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmbient);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDiffuse);
-    glLightfv(GL_LIGHT0, GL_SPECULAR, lightSpecular);
+    // Initialize matrices
+    m_viewMatrix = glm::mat4(1.0f);
+    m_projMatrix = glm::mat4(1.0f);
     
-    // Enable color material
-    glEnable(GL_COLOR_MATERIAL);
-    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+    // Configure OpenGL state for proper 3D rendering
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
+    
+    // Disable blending for solid surfaces
+    glDisable(GL_BLEND);
 }
 
 void Renderer::loadMesh(const Mesh& mesh) {
@@ -62,28 +76,31 @@ void Renderer::loadMesh(const Mesh& mesh) {
 void Renderer::render() {
     if (!m_vertexArray) return;
     
+    // Reset all OpenGL state to ensure proper rendering
     glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glDepthMask(GL_TRUE);
+    glDisable(GL_BLEND);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
+    
+    // Clear buffers
+    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-    // Render grid
-    if (m_gridEnabled) {
-        glPushMatrix();
-        glColor3f(m_gridMesh.m_color[0], m_gridMesh.m_color[1], m_gridMesh.m_color[2]);
-        glBegin(GL_LINES);
-        for (size_t i = 0; i < m_gridMesh.m_vertices.size(); i += 2) {
-            const auto& v1 = m_gridMesh.m_vertices[i];
-            const auto& v2 = m_gridMesh.m_vertices[i + 1];
-            glVertex3f(v1.position[0], v1.position[1], v1.position[2]);
-            glVertex3f(v2.position[0], v2.position[1], v2.position[2]);
-        }
-        glEnd();
-        glPopMatrix();
+    // Render grid first (if enabled)
+    if (m_gridEnabled && !m_vbos.empty()) {
+        renderMesh(m_gridMesh, m_vbos[0], m_ebos[0], m_wireframeVbos[0], m_wireframeEbos[0]);
     }
     
-    // Render meshes
+    // Render regular meshes (skip grid at index 0)
     for (size_t i = 0; i < m_meshes.size(); ++i) {
-        if (i < m_vbos.size() && i < m_ebos.size() && i < m_wireframeVbos.size() && i < m_wireframeEbos.size()) {
-            renderMesh(m_meshes[i], m_vbos[i], m_ebos[i], m_wireframeVbos[i], m_wireframeEbos[i]);
+        size_t bufferIndex = i + 1; // Offset by 1 to account for grid
+        if (bufferIndex < m_vbos.size() && bufferIndex < m_ebos.size() && 
+            bufferIndex < m_wireframeVbos.size() && bufferIndex < m_wireframeEbos.size()) {
+            renderMesh(m_meshes[i], m_vbos[bufferIndex], m_ebos[bufferIndex], 
+                      m_wireframeVbos[bufferIndex], m_wireframeEbos[bufferIndex]);
         }
     }
 }
@@ -112,68 +129,106 @@ void Renderer::renderMesh(const Mesh& mesh, GLuint vbo, GLuint ebo, GLuint wiref
 }
 
 void Renderer::renderSolid(const Mesh& mesh, GLuint vbo, GLuint ebo) {
-    // Ensure lighting is enabled for solid rendering
-    glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
+    // Force state for completely opaque solid rendering
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
+    glDisable(GL_BLEND);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
     
-    // Set material color
-    GLfloat materialColor[] = {mesh.m_color[0], mesh.m_color[1], mesh.m_color[2], 1.0f};
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, materialColor);
+    // Clear any errors
+    while (glGetError() != GL_NO_ERROR) {}
     
-    // Also set glColor for color material
-    glColor3f(mesh.m_color[0], mesh.m_color[1], mesh.m_color[2]);
+    m_basicShader->use();
     
-    // Bind buffers and render solid
+    // Set uniforms
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(mesh.m_position[0], mesh.m_position[1], mesh.m_position[2]));
+    model = glm::rotate(model, glm::radians(mesh.m_rotation[0]), glm::vec3(1, 0, 0));
+    model = glm::rotate(model, glm::radians(mesh.m_rotation[1]), glm::vec3(0, 1, 0));
+    model = glm::rotate(model, glm::radians(mesh.m_rotation[2]), glm::vec3(0, 0, 1));
+    model = glm::scale(model, glm::vec3(mesh.m_scale[0], mesh.m_scale[1], mesh.m_scale[2]));
+    
+    glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
+    
+    m_basicShader->setUniform("uModel", model);
+    m_basicShader->setUniform("uView", m_viewMatrix);
+    m_basicShader->setUniform("uProjection", m_projMatrix);
+    m_basicShader->setUniform("uNormalMatrix", normalMatrix);
+    m_basicShader->setUniform("uColor", glm::vec3(mesh.m_color[0], mesh.m_color[1], mesh.m_color[2]));
+    m_basicShader->setUniform("uLightPos", m_lightPos);
+    m_basicShader->setUniform("uLightColor", m_lightColor);
+    m_basicShader->setUniform("uViewPos", m_cameraPos);
+    
+    // Bind VAO and render
+    m_vertexArray->bind();
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_NORMAL_ARRAY);
+    setupVertexAttributes();
     
-    glVertexPointer(3, GL_FLOAT, sizeof(RenderVertex), (void*)offsetof(RenderVertex, position));
-    glNormalPointer(GL_FLOAT, sizeof(RenderVertex), (void*)offsetof(RenderVertex, normal));
-    
+    // Draw with completely opaque settings
     glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(mesh.getTriangleCount() * 3), GL_UNSIGNED_INT, 0);
     
-    glDisableClientState(GL_VERTEX_ARRAY);
-    glDisableClientState(GL_NORMAL_ARRAY);
+    // Check for any OpenGL errors
+    GLenum err;
+    while ((err = glGetError()) != GL_NO_ERROR) {
+        std::cerr << "OpenGL error in renderSolid: " << err << std::endl;
+    }
+    
+    m_vertexArray->unbind();
+    m_basicShader->unuse();
 }
 
 void Renderer::renderWireframe(const Mesh& mesh, GLuint wireframeVbo, GLuint wireframeEbo) {
-    // Set wireframe color (yellow if selected, normal color otherwise)
+    m_wireframeShader->use();
+    
+    // Set uniforms
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(mesh.m_position[0], mesh.m_position[1], mesh.m_position[2]));
+    model = glm::rotate(model, glm::radians(mesh.m_rotation[0]), glm::vec3(1, 0, 0));
+    model = glm::rotate(model, glm::radians(mesh.m_rotation[1]), glm::vec3(0, 1, 0));
+    model = glm::rotate(model, glm::radians(mesh.m_rotation[2]), glm::vec3(0, 0, 1));
+    model = glm::scale(model, glm::vec3(mesh.m_scale[0], mesh.m_scale[1], mesh.m_scale[2]));
+    
     auto wireframeColor = mesh.getCurrentWireframeColor();
-    glColor3f(wireframeColor[0], wireframeColor[1], wireframeColor[2]);
     
-    // Disable lighting for wireframe
-    glDisable(GL_LIGHTING);
+    m_wireframeShader->setUniform("uModel", model);
+    m_wireframeShader->setUniform("uView", m_viewMatrix);
+    m_wireframeShader->setUniform("uProjection", m_projMatrix);
+    m_wireframeShader->setUniform("uColor", glm::vec3(wireframeColor[0], wireframeColor[1], wireframeColor[2]));
     
-    // Enable line smoothing for better appearance
+    // For wireframe rendering, disable face culling and enable line rendering
+    glDisable(GL_CULL_FACE);
+    glPolygonOffset(-1.0f, -1.0f);
+    glEnable(GL_POLYGON_OFFSET_LINE);
     glEnable(GL_LINE_SMOOTH);
     glLineWidth(1.0f);
     
-    // Enable polygon offset to prevent z-fighting
-    glEnable(GL_POLYGON_OFFSET_LINE);
-    glPolygonOffset(-1.0f, -1.0f);
-    
-    // Bind wireframe buffers and render
+    // Bind VAO and render
+    m_vertexArray->bind();
     glBindBuffer(GL_ARRAY_BUFFER, wireframeVbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, wireframeEbo);
     
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(3, GL_FLOAT, sizeof(RenderVertex), (void*)offsetof(RenderVertex, position));
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(RenderVertex), (void*)0);
+    glEnableVertexAttribArray(0);
     
-    // Get the actual number of edge indices from the buffer
     GLint bufferSize;
     glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
     GLsizei indexCount = bufferSize / sizeof(unsigned int);
     
     glDrawElements(GL_LINES, indexCount, GL_UNSIGNED_INT, 0);
     
-    glDisableClientState(GL_VERTEX_ARRAY);
-    
+    // Restore state
     glDisable(GL_POLYGON_OFFSET_LINE);
     glDisable(GL_LINE_SMOOTH);
-    glEnable(GL_LIGHTING);
+    glEnable(GL_CULL_FACE);
+    
+    glDisableVertexAttribArray(0);
+    m_vertexArray->unbind();
+    m_wireframeShader->unuse();
 }
 
 void Renderer::setupMeshBuffers(const Mesh& mesh, GLuint& vbo, GLuint& ebo, GLuint& wireframeVbo, GLuint& wireframeEbo) {
@@ -248,12 +303,16 @@ void Renderer::cleanup() {
     m_meshes.clear();
 }
 
-void Renderer::setViewMatrix(const std::array<float, 16>& viewMatrix) {
+void Renderer::setViewMatrix(const glm::mat4& viewMatrix) {
     m_viewMatrix = viewMatrix;
 }
 
-void Renderer::setProjectionMatrix(const std::array<float, 16>& projMatrix) {
+void Renderer::setProjectionMatrix(const glm::mat4& projMatrix) {
     m_projMatrix = projMatrix;
+}
+
+void Renderer::setCameraPosition(const glm::vec3& position) {
+    m_cameraPos = position;
 }
 
 void Renderer::updateMesh(size_t index, const Mesh& mesh) {
@@ -268,5 +327,100 @@ void Renderer::updateAllMeshes(const std::vector<Mesh>& meshes) {
     for (size_t i = 0; i < minSize; ++i) {
         m_meshes[i] = meshes[i];
     }
+}
+
+bool Renderer::initializeShaders() {
+    m_basicShader = std::make_unique<Shader>();
+    m_wireframeShader = std::make_unique<Shader>();
+    
+    // Load basic shader
+    if (!m_basicShader->loadFromFile("shaders/basic.vert", "shaders/basic.frag")) {
+        // Fallback to embedded shaders if files don't exist
+        std::string vertexSource = R"(
+            #version 330 core
+            layout (location = 0) in vec3 aPosition;
+            layout (location = 1) in vec3 aNormal;
+            uniform mat4 uModel;
+            uniform mat4 uView;
+            uniform mat4 uProjection;
+            uniform mat3 uNormalMatrix;
+            out vec3 FragPos;
+            out vec3 Normal;
+            void main() {
+                FragPos = vec3(uModel * vec4(aPosition, 1.0));
+                Normal = uNormalMatrix * aNormal;
+                gl_Position = uProjection * uView * vec4(FragPos, 1.0);
+            }
+        )";
+        
+        std::string fragmentSource = R"(
+            #version 330 core
+            in vec3 FragPos;
+            in vec3 Normal;
+            uniform vec3 uColor;
+            uniform vec3 uLightPos;
+            uniform vec3 uLightColor;
+            uniform vec3 uViewPos;
+            out vec4 FragColor;
+            void main() {
+                float ambientStrength = 0.3;
+                vec3 ambient = ambientStrength * uLightColor;
+                vec3 norm = normalize(Normal);
+                vec3 lightDir = normalize(uLightPos - FragPos);
+                float diff = max(dot(norm, lightDir), 0.0);
+                vec3 diffuse = diff * uLightColor;
+                float specularStrength = 0.5;
+                vec3 viewDir = normalize(uViewPos - FragPos);
+                vec3 reflectDir = reflect(-lightDir, norm);
+                float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+                vec3 specular = specularStrength * spec * uLightColor;
+                vec3 result = (ambient + diffuse + specular) * uColor;
+                FragColor = vec4(result, 1.0); // Ensure alpha is always 1.0
+            }
+        )";
+        
+        if (!m_basicShader->loadFromSource(vertexSource, fragmentSource)) {
+            return false;
+        }
+    }
+    
+    // Load wireframe shader
+    if (!m_wireframeShader->loadFromFile("shaders/wireframe.vert", "shaders/wireframe.frag")) {
+        std::string wireVertSource = R"(
+            #version 330 core
+            layout (location = 0) in vec3 aPosition;
+            uniform mat4 uModel;
+            uniform mat4 uView;
+            uniform mat4 uProjection;
+            void main() {
+                gl_Position = uProjection * uView * uModel * vec4(aPosition, 1.0);
+            }
+        )";
+        
+        std::string wireFragSource = R"(
+            #version 330 core
+            uniform vec3 uColor;
+            out vec4 FragColor;
+            void main() {
+                FragColor = vec4(uColor, 1.0);
+            }
+        )";
+        
+        if (!m_wireframeShader->loadFromSource(wireVertSource, wireFragSource)) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+void Renderer::setupVertexAttributes() {
+    // Position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(RenderVertex), (void*)offsetof(RenderVertex, position));
+    glEnableVertexAttribArray(0);
+    
+    // Normal attribute
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(RenderVertex), (void*)offsetof(RenderVertex, normal));
+    glEnableVertexAttribArray(1);
 }
 
