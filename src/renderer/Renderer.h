@@ -23,6 +23,11 @@ public:
     void setProjectionMatrix(const glm::mat4& projMatrix);
     void setCameraPosition(const glm::vec3& position);
     void enableGrid(bool enable) { m_gridEnabled = enable; }
+    void setGridColor(float r, float g, float b) { m_gridColor = glm::vec3(r, g, b); }
+    void setBackgroundColor(float r, float g, float b) { m_backgroundColor = glm::vec3(r, g, b); }
+    glm::vec3 getGridColor() const { return m_gridColor; }
+    glm::vec3 getBackgroundColor() const { return m_backgroundColor; }
+    bool isGridEnabled() const { return m_gridEnabled; }
     
     // Viewport resize handling
     void resize(int width, int height);
@@ -46,6 +51,8 @@ private:
     // Grid
     Mesh m_gridMesh;
     bool m_gridEnabled = true;
+    glm::vec3 m_gridColor = glm::vec3(0.5f, 0.5f, 0.5f); // Default gray grid
+    glm::vec3 m_backgroundColor = glm::vec3(0.1f, 0.1f, 0.1f); // Default dark background
     int m_viewportWidth = 800;
     int m_viewportHeight = 600;
     

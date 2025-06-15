@@ -308,6 +308,29 @@ void UIManager::renderViewportControls() {
     
     ImGui::Separator();
     
+    // Rendering Settings
+    if (ImGui::CollapsingHeader("Rendering Settings")) {
+        // Grid color picker
+        if (m_viewport && m_viewport->getRenderer()) {
+            auto* renderer = m_viewport->getRenderer();
+            
+            glm::vec3 gridColor = renderer->getGridColor();
+            float gridColorArray[3] = {gridColor.x, gridColor.y, gridColor.z};
+            if (ImGui::ColorEdit3("Grid Color", gridColorArray)) {
+                renderer->setGridColor(gridColorArray[0], gridColorArray[1], gridColorArray[2]);
+            }
+            
+            // Background color picker
+            glm::vec3 bgColor = renderer->getBackgroundColor();
+            float bgColorArray[3] = {bgColor.x, bgColor.y, bgColor.z};
+            if (ImGui::ColorEdit3("Background Color", bgColorArray)) {
+                renderer->setBackgroundColor(bgColorArray[0], bgColorArray[1], bgColorArray[2]);
+            }
+        }
+    }
+    
+    ImGui::Separator();
+    
     if (ImGui::Button("Reset Camera")) {
         if (m_viewport) m_viewport->resetCamera();
     }

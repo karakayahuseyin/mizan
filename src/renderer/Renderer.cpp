@@ -7,7 +7,7 @@
 #include <glm/gtc/matrix_inverse.hpp>
 
 Renderer::Renderer() 
-    : m_vertexArray(nullptr), m_gridEnabled(true) {
+    : m_vertexArray(nullptr), m_gridEnabled(true), m_backgroundColor(0.2f, 0.2f, 0.2f) {
     // Initialize matrices
     m_viewMatrix = glm::mat4(1.0f);
     m_projMatrix = glm::mat4(1.0f);
@@ -31,8 +31,7 @@ void Renderer::initialize() {
     // Create grid mesh using BREP and tessellation
     BREP::Solid gridSolid = BREP::BREPBuilder::createGridSolid(20, 0.5f);
     m_gridMesh = Tessellator::tessellate(gridSolid);
-    m_gridMesh.setColor(0.3f, 0.3f, 0.3f);
-    m_gridMesh.setWireframeColor(0.3f, 0.3f, 0.3f);
+    // Don't set static colors - use dynamic grid color
     m_gridMesh.m_showSolid = false;  // Grid should only show wireframe
     m_gridMesh.m_showWireframe = true;
     
@@ -76,6 +75,10 @@ void Renderer::loadMesh(const Mesh& mesh) {
 }
 
 void Renderer::render() {
+    // Clear with background color
+    glClearColor(m_backgroundColor.x, m_backgroundColor.y, m_backgroundColor.z, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
     if (!m_vertexArray) return;
     
     // Reset all OpenGL state to ensure proper rendering
@@ -86,10 +89,6 @@ void Renderer::render() {
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
-    
-    // Clear buffers
-    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     // Render grid first (if enabled)
     if (m_gridEnabled && !m_vbos.empty()) {
@@ -202,12 +201,27 @@ void Renderer::renderWireframe(const Mesh& mesh, GLuint wireframeVbo, GLuint wir
     model = glm::rotate(model, glm::radians(mesh.m_rotation[2]), glm::vec3(0, 0, 1));
     model = glm::scale(model, glm::vec3(mesh.m_scale[0], mesh.m_scale[1], mesh.m_scale[2]));
     
-    auto wireframeColor = mesh.getCurrentWireframeColor();
+    // Check if this is the grid mesh
+    bool isGridMesh = (&mesh == &m_gridMesh);
+    glm::vec3 wireframeColor;
+    
+    if (isGridMesh) {
+        // Use dynamic grid color for grid
+        wireframeColor = m_gridColor;
+    } else {
+        // Use mesh-specific wireframe color for objects
+        auto meshWireframeColor = mesh.getCurrentWireframeColor();
+        wireframeColor = glm::vec3(meshWireframeColor[0], meshWireframeColor[1], meshWireframeColor[2]);
+    }
     
     m_wireframeShader->setUniform("uModel", model);
     m_wireframeShader->setUniform("uView", m_viewMatrix);
     m_wireframeShader->setUniform("uProjection", m_projMatrix);
-    m_wireframeShader->setUniform("uColor", glm::vec3(wireframeColor[0], wireframeColor[1], wireframeColor[2]));
+    m_wireframeShader->setUniform("uColor", wireframeColor);
+    
+    // Set alpha - make grid slightly transparent, objects opaque
+    float alpha = isGridMesh ? 0.7f : 1.0f;
+    m_wireframeShader->setUniform("uAlpha", alpha);
     
     // For wireframe rendering, disable face culling and enable line rendering
     glDisable(GL_CULL_FACE);
@@ -415,9 +429,10 @@ bool Renderer::initializeShaders() {
         std::string wireFragSource = R"(
             #version 330 core
             uniform vec3 uColor;
+            uniform float uAlpha;
             out vec4 FragColor;
             void main() {
-                FragColor = vec4(uColor, 1.0);
+                FragColor = vec4(uColor, uAlpha);
             }
         )";
         
@@ -438,4 +453,3 @@ void Renderer::setupVertexAttributes() {
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(RenderVertex), (void*)offsetof(RenderVertex, normal));
     glEnableVertexAttribArray(1);
 }
-
