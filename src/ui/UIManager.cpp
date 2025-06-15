@@ -141,7 +141,12 @@ void UIManager::renderMainMenuBar() {
 void UIManager::renderObjectList() {
     if (!m_showObjectList) return;
     
-    ImGui::Begin("Scene Objects", &m_showObjectList);
+    // Set fixed position and size for Object List window
+    ImGui::SetNextWindowPos(ImVec2(10, 30), ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImVec2(250, 300), ImGuiCond_Always);
+    
+    ImGuiWindowFlags flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+    ImGui::Begin("Scene Objects", &m_showObjectList, flags);
     
     if (onGetSceneObjects) {
         const auto& sceneObjects = onGetSceneObjects();
@@ -180,7 +185,12 @@ void UIManager::renderObjectList() {
 void UIManager::renderObjectProperties() {
     if (!m_showObjectProperties) return;
     
-    ImGui::Begin("Properties", &m_showObjectProperties);
+    // Set fixed position and size for Properties window
+    ImGui::SetNextWindowPos(ImVec2(10, 340), ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImVec2(250, 400), ImGuiCond_Always);
+    
+    ImGuiWindowFlags flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+    ImGui::Begin("Properties", &m_showObjectProperties, flags);
     
     SceneObject* selectedObj = onGetSelectedObject ? onGetSelectedObject() : nullptr;
     if (selectedObj) {
@@ -255,7 +265,12 @@ void UIManager::renderObjectProperties() {
 }
 
 void UIManager::renderViewportControls() {
-    ImGui::Begin("Viewport Controls");
+    // Set fixed position and size for Viewport Controls window
+    ImGui::SetNextWindowPos(ImVec2(m_window->getWidth() - 260, 30), ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImVec2(250, 360), ImGuiCond_Always);
+    
+    ImGuiWindowFlags flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+    ImGui::Begin("Viewport Controls", nullptr, flags);
     
     ImGui::Text("Camera Controls:");
     ImGui::Text("Left Mouse: Rotate");
@@ -339,7 +354,13 @@ void UIManager::renderViewportControls() {
 }
 
 void UIManager::renderKeyboardShortcuts() {
-    ImGui::Begin("Keyboard Shortcuts");
+    // Set fixed position and size for Keyboard Shortcuts window
+    ImGui::SetNextWindowPos(ImVec2(m_window->getWidth() - 260, 400), ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImVec2(250, 200), ImGuiCond_Always);
+    
+    ImGuiWindowFlags flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+    ImGui::Begin("Keyboard Shortcuts", nullptr, flags);
+    
     ImGui::Text("W - Toggle Wireframe");
     ImGui::Text("S - Toggle Solid");
     ImGui::Text("1 - Wireframe Only");
