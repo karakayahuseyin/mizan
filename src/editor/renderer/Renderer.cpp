@@ -121,8 +121,8 @@ void Renderer::renderMesh(const Mesh& mesh, GLuint vbo, GLuint ebo, GLuint wiref
         renderSolid(mesh, vbo, ebo);
     }
     
-    // Render wireframe
-    if (mesh.m_showWireframe) {
+    // Render wireframe - show if explicitly enabled OR if object is selected
+    if (mesh.m_showWireframe || mesh.isSelected()) {
         renderWireframe(mesh, wireframeVbo, wireframeEbo);
     }
     
