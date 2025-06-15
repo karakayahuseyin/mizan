@@ -1,7 +1,7 @@
-#include "Tesselator.h"
-#include "../modeller/Face.h"
-#include "../modeller/Loop.h"
-#include "../modeller/Vertex.h"
+#include "Tessellator.h"
+#include "brep/Face.h"
+#include "brep/Loop.h"
+#include "brep/Vertex.h"
 #include <cmath>
 #include <set>
 #include <glm/glm.hpp>

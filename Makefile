@@ -1,5 +1,5 @@
-BUILD_DIR = bin
-EXECUTABLE = $(BUILD_DIR)/Simple3D
+BUILD_DIR = build
+EXECUTABLE = $(BUILD_DIR)/bin/MizanEditor
 
 .PHONY: all build run clean
 

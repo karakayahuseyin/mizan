@@ -1,8 +1,8 @@
 #ifndef TESSELLATOR_H
 #define TESSELLATOR_H
 
-#include "../modeller/Solid.h"
-#include "../modeller/BREPBuilder.h"
+#include "brep/Solid.h"
+#include "brep/BREPBuilder.h"
 #include <vector>
 #include <array>
 

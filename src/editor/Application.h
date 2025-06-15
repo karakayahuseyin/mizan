@@ -5,8 +5,8 @@
 #include "ui/Window.h"
 #include "ui/Viewport.h"
 #include "ui/UIManager.h"
-#include "renderer/Tesselator.h"
-#include "modeller/BREPBuilder.h"
+#include "renderer/Tessellator.h"
+#include "brep/BREPBuilder.h"
 #include <memory>
 #include <vector>
 #include <string>
