@@ -27,6 +27,8 @@ add_executable(${PROJECT_NAME}
     src/main.cpp
     src/Application.cpp
     src/ui/Window.cpp
+    src/ui/Viewport.cpp
+    src/ui/UIManager.cpp
     src/modeller/Edge.cpp
     src/modeller/Face.cpp
     src/modeller/Vertex.cpp

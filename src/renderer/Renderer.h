@@ -24,6 +24,9 @@ public:
     void setCameraPosition(const glm::vec3& position);
     void enableGrid(bool enable) { m_gridEnabled = enable; }
     
+    // Viewport resize handling
+    void resize(int width, int height);
+    
     // Update existing mesh properties
     void updateMesh(size_t index, const Mesh& mesh);
     void updateAllMeshes(const std::vector<Mesh>& meshes);

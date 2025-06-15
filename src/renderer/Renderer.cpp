@@ -324,6 +324,10 @@ void Renderer::setCameraPosition(const glm::vec3& position) {
     m_cameraPos = position;
 }
 
+void Renderer::resize(int width, int height) {
+    glViewport(0, 0, width, height);
+}
+
 void Renderer::updateMesh(size_t index, const Mesh& mesh) {
     if (index < m_meshes.size()) {
         m_meshes[index] = mesh;

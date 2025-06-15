@@ -47,6 +47,9 @@ public:
     void setAspectRatio(float aspectRatio);
     void setFOV(float fov);
     
+    // Viewport resize handling
+    void resize(int width, int height);
+    
 private:
     void updatePosition();
     void updateMatrices();

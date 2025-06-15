@@ -7,6 +7,7 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include <string>
+#include <functional>
 
 class Window {
 private:
@@ -51,10 +52,16 @@ public:
     // Scroll handling
     void handleScroll(double xoffset, double yoffset);
     double getScrollDelta();
+    
+    // Window resize handling
+    void setResizeCallback(std::function<void(int, int)> callback);
 
 private:
     bool initImGui();
     void cleanupImGui();
+    
+    // Resize callback
+    std::function<void(int, int)> m_resizeCallback;
     
     // Static callbacks for GLFW
     static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
@@ -62,6 +69,7 @@ private:
     static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
     static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
     static void charCallback(GLFWwindow* window, unsigned int c);
+    static void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 };
 
 #endif // UI_WINDOW_H

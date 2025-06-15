@@ -155,6 +155,7 @@ void Window::setMouseCallbacks() {
     glfwSetScrollCallback(m_window, scrollCallback);
     glfwSetKeyCallback(m_window, keyCallback);
     glfwSetCharCallback(m_window, charCallback);
+    glfwSetFramebufferSizeCallback(m_window, framebufferSizeCallback);
 }
 
 void Window::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
@@ -226,4 +227,24 @@ double Window::getScrollDelta() {
     double delta = m_scrollDelta;
     m_scrollDelta = 0.0; // Reset after reading
     return delta;
+}
+
+void Window::setResizeCallback(std::function<void(int, int)> callback) {
+    m_resizeCallback = callback;
+}
+
+void Window::framebufferSizeCallback(GLFWwindow* window, int width, int height) {
+    Window* win = static_cast<Window*>(glfwGetWindowUserPointer(window));
+    if (win) {
+        win->m_width = width;
+        win->m_height = height;
+        
+        // Update OpenGL viewport
+        glViewport(0, 0, width, height);
+        
+        // Call user-defined resize callback
+        if (win->m_resizeCallback) {
+            win->m_resizeCallback(width, height);
+        }
+    }
 }

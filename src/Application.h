@@ -3,13 +3,14 @@
 
 // Use the UI Window class to avoid conflicts
 #include "ui/Window.h"
-#include "renderer/Renderer.h"
+#include "ui/Viewport.h"
+#include "ui/UIManager.h"
 #include "renderer/Tesselator.h"
-#include "renderer/Camera.h"
 #include "modeller/BREPBuilder.h"
 #include <memory>
 #include <vector>
 #include <string>
+#include <glm/glm.hpp>
 
 struct SceneObject {
     Mesh mesh;
@@ -21,38 +22,22 @@ struct SceneObject {
 class Application {
 private:
     std::unique_ptr<Window> m_window;
-    std::unique_ptr<Renderer> m_renderer;
-    std::unique_ptr<Camera> m_camera;
+    std::unique_ptr<Viewport> m_viewport;
+    std::unique_ptr<UIManager> m_uiManager;
     
     std::vector<SceneObject> m_sceneObjects;
-    Mesh m_gridMesh; // Add grid mesh as a member
     int m_nextObjectId = 1;
     int m_selectedObjectId = -1;
     
     bool m_running;
     
-    // UI state
-    float m_triangleColor[3] = {1.0f, 0.5f, 0.0f};
-    float m_rotation = 0.0f;
-    bool m_showGrid = true;
-    bool m_showObjectList = true;
-    bool m_showObjectProperties = true;
+    // Animation/update variables
+    float m_rotation;
+    float m_triangleColor[3];
     
     // Global rendering modes
     bool m_globalWireframeMode = false;
     bool m_globalSolidMode = true;
-    
-    // Mouse state
-    bool m_isRotating = false;
-    bool m_isPanning = false;
-
-    // Mouse interaction
-    void handleMouseClick(double x, double y);
-    int performRaycast(double mouseX, double mouseY);
-    bool rayIntersectsTriangle(const glm::vec3& rayOrigin, const glm::vec3& rayDir, 
-                              const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
-                              float& distance);
-    glm::vec3 screenToWorldRay(double mouseX, double mouseY);
 
 public:
     Application();
@@ -61,6 +46,9 @@ public:
     bool init();
     void run();
     void shutdown();
+    
+    // Public interface for main to create test objects
+    void addTestObjects();
 
 private:
     void update();
@@ -72,9 +60,10 @@ private:
     void removeObject(int objectId);
     void selectObject(int objectId);
     SceneObject* getSelectedObject();
+    const std::vector<SceneObject>& getSceneObjects() const { return m_sceneObjects; }
     
     // Mesh synchronization
-    void syncMeshesToRenderer();
+    void syncMeshesToViewport();
     void syncSelectedObjectMesh();
     
     // Rendering mode management
@@ -83,14 +72,7 @@ private:
     void toggleWireframeMode();
     void toggleSolidMode();
     
-    // UI rendering
-    void renderMainMenuBar();
-    void renderObjectList();
-    void renderObjectProperties();
-    void renderViewportControls();
-    
-    // Input handling
-    void handleMouseInput();
+    void setupUICallbacks();
 };
 
 #endif // APPLICATION_H

@@ -86,6 +86,12 @@ void Camera::setFOV(float fov) {
     m_isDirty = true;
 }
 
+void Camera::resize(int width, int height) {
+    if (height > 0) {
+        setAspectRatio(static_cast<float>(width) / static_cast<float>(height));
+    }
+}
+
 void Camera::updatePosition() {
     float yawRad = glm::radians(m_yaw);
     float pitchRad = glm::radians(m_pitch);

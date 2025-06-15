@@ -9,6 +9,9 @@ int main() {
         return -1;
     }
 
+    // Create test objects after initialization
+    app.addTestObjects();
+
     app.run();
     
     return 0;
