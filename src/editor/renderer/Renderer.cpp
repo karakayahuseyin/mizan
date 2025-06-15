@@ -1,6 +1,6 @@
 #include "Renderer.h"
-#include "Tesselator.h"
-#include "../modeller/BREPBuilder.h"
+#include "Tessellator.h"
+#include "brep/BREPBuilder.h"
 #include <iostream>
 #include <GL/glu.h>
 #include <glm/gtc/matrix_transform.hpp>

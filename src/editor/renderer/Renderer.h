@@ -2,7 +2,7 @@
 #define RENDERER_H
 
 #include <GL/glew.h>
-#include "Tesselator.h"
+#include "Tessellator.h"
 #include "VertexArray.h"
 #include "Shader.h"
 #include <memory>
