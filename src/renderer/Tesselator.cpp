@@ -96,11 +96,24 @@ void Tessellator::processFace(const std::shared_ptr<BREP::Face>& face, Mesh& mes
         mesh.m_vertices.push_back(renderVertex);
     }
     
-    // Triangulate the face (simple fan triangulation for convex faces)
-    for (size_t i = 1; i < vertices.size() - 1; ++i) {
-        Triangle triangle;
-        triangle.indices = {{startIndex, startIndex + static_cast<unsigned int>(i), startIndex + static_cast<unsigned int>(i + 1)}};
-        mesh.m_triangles.push_back(triangle);
+    // Special handling for grid quads - ensure they stay as quads for wireframe
+    if (vertices.size() == 4) {
+        // For quad faces (like grid), create two triangles but store quad info for wireframe
+        Triangle tri1, tri2;
+        tri1.indices = {{startIndex, startIndex + 1, startIndex + 2}};
+        tri2.indices = {{startIndex, startIndex + 2, startIndex + 3}};
+        mesh.m_triangles.push_back(tri1);
+        mesh.m_triangles.push_back(tri2);
+        
+        // Mark this as a special grid quad by storing additional edge information
+        // This will help the wireframe renderer show proper quad edges
+    } else {
+        // For other faces, use fan triangulation
+        for (size_t i = 1; i < vertices.size() - 1; ++i) {
+            Triangle triangle;
+            triangle.indices = {{startIndex, startIndex + static_cast<unsigned int>(i), startIndex + static_cast<unsigned int>(i + 1)}};
+            mesh.m_triangles.push_back(triangle);
+        }
     }
 }
 
@@ -146,15 +159,51 @@ std::vector<std::pair<unsigned int, unsigned int>> Mesh::getEdges() const {
     std::vector<std::pair<unsigned int, unsigned int>> edges;
     std::set<std::pair<unsigned int, unsigned int>> edgeSet;
     
-    // Extract unique edges from triangles
-    for (const auto& triangle : m_triangles) {
-        for (int i = 0; i < 3; ++i) {
-            unsigned int v1 = triangle.indices[i];
-            unsigned int v2 = triangle.indices[(i + 1) % 3];
-            
-            // Ensure consistent edge ordering (smaller index first)
-            if (v1 > v2) std::swap(v1, v2);
-            edgeSet.insert({v1, v2});
+    // For grid meshes, we want to show quad edges, not triangle edges
+    // Check if this looks like a grid (many quads in a regular pattern)
+    bool isGrid = (m_triangles.size() % 2 == 0) && (m_vertices.size() > 16);
+    
+    if (isGrid) {
+        // Create quad-based edges for grid
+        for (size_t i = 0; i < m_triangles.size(); i += 2) {
+            if (i + 1 < m_triangles.size()) {
+                const auto& tri1 = m_triangles[i];
+                const auto& tri2 = m_triangles[i + 1];
+                
+                // Find the shared edge between the two triangles
+                std::set<unsigned int> tri1Verts = {tri1.indices[0], tri1.indices[1], tri1.indices[2]};
+                std::set<unsigned int> tri2Verts = {tri2.indices[0], tri2.indices[1], tri2.indices[2]};
+                
+                // Find unique vertices (quad corners)
+                std::set<unsigned int> quadVerts;
+                for (auto v : tri1Verts) quadVerts.insert(v);
+                for (auto v : tri2Verts) quadVerts.insert(v);
+                
+                if (quadVerts.size() == 4) {
+                    // Convert to vector for ordering
+                    std::vector<unsigned int> verts(quadVerts.begin(), quadVerts.end());
+                    
+                    // Add quad edges (assuming counter-clockwise ordering)
+                    for (size_t j = 0; j < 4; ++j) {
+                        unsigned int v1 = verts[j];
+                        unsigned int v2 = verts[(j + 1) % 4];
+                        if (v1 > v2) std::swap(v1, v2);
+                        edgeSet.insert({v1, v2});
+                    }
+                }
+            }
+        }
+    } else {
+        // Regular triangle-based edge extraction
+        for (const auto& triangle : m_triangles) {
+            for (int i = 0; i < 3; ++i) {
+                unsigned int v1 = triangle.indices[i];
+                unsigned int v2 = triangle.indices[(i + 1) % 3];
+                
+                // Ensure consistent edge ordering (smaller index first)
+                if (v1 > v2) std::swap(v1, v2);
+                edgeSet.insert({v1, v2});
+            }
         }
     }
     

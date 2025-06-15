@@ -206,7 +206,8 @@ void Application::addObject(const std::string& type) {
 void Application::setGlobalWireframeMode(bool enabled) {
     m_globalWireframeMode = enabled;
     if (m_uiManager) {
-        m_uiManager->m_globalWireframeMode = enabled;
+        // Use the accessor method instead of directly accessing the private member
+        m_uiManager->setGlobalWireframeMode(enabled);
     }
     for (auto& obj : m_sceneObjects) {
         obj.mesh.m_showWireframe = enabled;
@@ -217,7 +218,8 @@ void Application::setGlobalWireframeMode(bool enabled) {
 void Application::setGlobalSolidMode(bool enabled) {
     m_globalSolidMode = enabled;
     if (m_uiManager) {
-        m_uiManager->m_globalSolidMode = enabled;
+        // Use the accessor method instead of directly accessing the private member
+        m_uiManager->setGlobalSolidMode(enabled);
     }
     for (auto& obj : m_sceneObjects) {
         obj.mesh.m_showSolid = enabled;

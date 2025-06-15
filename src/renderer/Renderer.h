@@ -46,6 +46,8 @@ private:
     // Grid
     Mesh m_gridMesh;
     bool m_gridEnabled = true;
+    int m_viewportWidth = 800;
+    int m_viewportHeight = 600;
     
     // Matrices and lighting
     glm::mat4 m_viewMatrix;

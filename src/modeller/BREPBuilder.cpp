@@ -136,30 +136,19 @@ Solid BREPBuilder::createGridSolid(int size, float spacing) {
     // Create shell
     auto shell = std::make_shared<Shell>();
     
-    // Create faces for each grid cell
+    // Create quad faces for each grid cell
     for (int i = 0; i < size; ++i) {
         for (int j = 0; j < size; ++j) {
-            // Create two triangular faces for each grid cell
-            
-            // First triangle
-            std::vector<VertexPtr> tri1Vertices = {
+            // Create quad face for each grid cell (counter-clockwise)
+            std::vector<VertexPtr> quadVertices = {
                 gridVertices[i][j],
                 gridVertices[i+1][j],
+                gridVertices[i+1][j+1],
                 gridVertices[i][j+1]
             };
-            auto loop1 = createSimpleLoop(tri1Vertices);
-            auto face1 = std::make_shared<Face>(loop1);
-            shell->addFace(face1);
-            
-            // Second triangle
-            std::vector<VertexPtr> tri2Vertices = {
-                gridVertices[i][j+1],
-                gridVertices[i+1][j],
-                gridVertices[i+1][j+1]
-            };
-            auto loop2 = createSimpleLoop(tri2Vertices);
-            auto face2 = std::make_shared<Face>(loop2);
-            shell->addFace(face2);
+            auto loop = createSimpleLoop(quadVertices);
+            auto face = std::make_shared<Face>(loop);
+            shell->addFace(face);
         }
     }
     

@@ -7,6 +7,10 @@
 Shader::Shader() : m_programId(0) {
 }
 
+Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath) : m_programId(0) {
+    loadFromFile(vertexPath, fragmentPath);
+}
+
 Shader::~Shader() {
     if (m_programId != 0) {
         glDeleteProgram(m_programId);

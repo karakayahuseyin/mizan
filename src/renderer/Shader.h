@@ -8,6 +8,7 @@
 class Shader {
 public:
     Shader();
+    Shader(const std::string& vertexPath, const std::string& fragmentPath);
     ~Shader();
     
     bool loadFromFile(const std::string& vertexPath, const std::string& fragmentPath);
@@ -24,6 +25,10 @@ public:
     void setUniform(const std::string& name, const glm::mat3& value) const;
     void setUniform(const std::string& name, int value) const;
     void setUniform(const std::string& name, bool value) const;
+    
+    // Legacy method names for compatibility
+    void setMat4(const std::string& name, const glm::mat4& value) const { setUniform(name, value); }
+    void setVec3(const std::string& name, const glm::vec3& value) const { setUniform(name, value); }
     
     GLuint getProgramId() const { return m_programId; }
     bool isValid() const { return m_programId != 0; }

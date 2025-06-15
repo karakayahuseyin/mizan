@@ -3,6 +3,7 @@
 #include "../ui/Viewport.h"
 #include "../Application.h"
 #include <cstring>
+#include <iostream>
 
 UIManager::UIManager(Window* window, Viewport* viewport)
     : m_window(window), m_viewport(viewport) {
@@ -300,7 +301,7 @@ void UIManager::renderViewportControls() {
         if (onSetGlobalSolidMode) onSetGlobalSolidMode(m_globalSolidMode);
     }
     
-    // Grid control
+    // Grid controls
     if (ImGui::Checkbox("Show Grid", &m_showGrid)) {
         if (m_viewport) m_viewport->enableGrid(m_showGrid);
     }

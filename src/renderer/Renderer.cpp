@@ -326,6 +326,8 @@ void Renderer::setCameraPosition(const glm::vec3& position) {
 
 void Renderer::resize(int width, int height) {
     glViewport(0, 0, width, height);
+    m_viewportWidth = width;
+    m_viewportHeight = height;
 }
 
 void Renderer::updateMesh(size_t index, const Mesh& mesh) {
