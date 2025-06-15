@@ -11,7 +11,7 @@ For other distros, check their package managers.
 ## For Build and Run
 ```sh
 # clone this repository
-git clone --recursive https://github.com/karakayahuseyin/simple3d.git
+git clone --recursive https://github.com/karakayahuseyin/mizan.git
 make build
 make run
 ```
