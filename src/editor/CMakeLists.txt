@@ -40,10 +40,10 @@ target_link_libraries(imgui_backend imgui glfw OpenGL::GL)
 
 # Create shaders directory in bin and copy shader files
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/bin/shaders)
-configure_file(${EDITOR_DIR}/shaders/basic.vert ${CMAKE_BINARY_DIR}/bin/shaders/basic.vert COPYONLY)
-configure_file(${EDITOR_DIR}/shaders/basic.frag ${CMAKE_BINARY_DIR}/bin/shaders/basic.frag COPYONLY)
-configure_file(${EDITOR_DIR}/shaders/wireframe.vert ${CMAKE_BINARY_DIR}/bin/shaders/wireframe.vert COPYONLY)
-configure_file(${EDITOR_DIR}/shaders/wireframe.frag ${CMAKE_BINARY_DIR}/bin/shaders/wireframe.frag COPYONLY)
+configure_file(${EDITOR_DIR}/renderer/shaders/basic.vert ${CMAKE_BINARY_DIR}/bin/shaders/basic.vert COPYONLY)
+configure_file(${EDITOR_DIR}/renderer/shaders/basic.frag ${CMAKE_BINARY_DIR}/bin/shaders/basic.frag COPYONLY)
+configure_file(${EDITOR_DIR}/renderer/shaders/wireframe.vert ${CMAKE_BINARY_DIR}/bin/shaders/wireframe.vert COPYONLY)
+configure_file(${EDITOR_DIR}/renderer/shaders/wireframe.frag ${CMAKE_BINARY_DIR}/bin/shaders/wireframe.frag COPYONLY)
 
 add_executable(${PROJECT_NAME}Editor
     ${EDITOR_DIR}/main.cpp
