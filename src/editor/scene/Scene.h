@@ -10,6 +10,7 @@ public:
     ~Scene();
 
     // Object management
+    void addSolid(const BREP::Solid& solid, const std::string& name);
     void addObject(const std::string& type);
     void removeObject(int objectId);
     void selectObject(int objectId);

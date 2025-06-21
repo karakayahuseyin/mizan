@@ -1,13 +1,29 @@
 #ifndef TOOLKIT_H
 #define TOOLKIT_H
 
+#include "window/Window.h"
+#include "modeller/Modeller.h"
+#include "scene/Scene.h"
+
+/**
+ * Toolkit is a ui module that provides a set of tools and utilities
+ * for the editor's workbench. It includes functionalities for modelling
+ * For modelling operations using the mizan::Modeller instance.
+ */
 class Toolkit {
 public:
-    Toolkit() = default;
-    ~Toolkit() = default;
+    Toolkit(Window* window, Scene* scene = nullptr);
+    ~Toolkit();
 
     void initialize();
+    void update();
+    void render();
     void cleanup();
+
+private:
+    Window* m_window = nullptr; // Pointer to the main application window for drawing ImGui elements
+    Scene* m_scene = nullptr; // Pointer to the scene containing all objects for interaction
+    mizan::Modeller* m_modeller = nullptr; // Pointer to the Modeller instance for modelling operations
 };
 
 #endif // TOOLKIT_H

@@ -49,16 +49,17 @@ add_executable(${PROJECT_NAME}Editor
     ${EDITOR_DIR}/main.cpp
     ${EDITOR_DIR}/Application.cpp
     ${EDITOR_DIR}/window/Window.cpp
-    ${EDITOR_DIR}/window/UIManager.cpp
     ${EDITOR_DIR}/workbench/Workbench.cpp
     ${EDITOR_DIR}/workbench/Viewport.cpp
     ${EDITOR_DIR}/workbench/Toolkit.cpp 
+    ${EDITOR_DIR}/scene/Scene.cpp
     ${EDITOR_DIR}/renderer/Mesh.cpp
     ${EDITOR_DIR}/renderer/Tessellator.cpp
     ${EDITOR_DIR}/renderer/Renderer.cpp
     ${EDITOR_DIR}/renderer/VertexArray.cpp
     ${EDITOR_DIR}/renderer/Camera.cpp
     ${EDITOR_DIR}/renderer/Shader.cpp
+    ${EDITOR_DIR}/logger/Logger.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}Editor

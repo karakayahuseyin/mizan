@@ -8,7 +8,7 @@
 #include <memory>
 
 struct SceneObject {
-    std::shared_ptr<brep::Solid> solid;
+    std::shared_ptr<BREP::Solid> solid;
     std::shared_ptr<Mesh> mesh;
     std::string name;
     int id;

@@ -54,3 +54,5 @@ public:
     // Edge extraction for wireframe
     std::vector<std::pair<unsigned int, unsigned int>> getEdges() const;
 };
+
+#endif // MESH_H

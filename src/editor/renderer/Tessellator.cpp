@@ -1,4 +1,6 @@
 #include "Tessellator.h"
+#include "brep/Solid.h"
+#include "brep/Shell.h"
 #include "brep/Face.h"
 #include "brep/Loop.h"
 #include "brep/Vertex.h"

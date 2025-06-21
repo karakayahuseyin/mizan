@@ -10,7 +10,7 @@ int main() {
     }
 
     // Create test objects after initialization
-    app.addTestObjects();
+    // app.addTestObjects();
 
     app.run();
     

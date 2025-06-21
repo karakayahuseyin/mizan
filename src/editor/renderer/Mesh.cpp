@@ -1,5 +1,9 @@
 #include "Mesh.h"
 
+#include <algorithm>
+#include <set>
+
+
 void Mesh::clear() {
     m_vertices.clear();
     m_triangles.clear();

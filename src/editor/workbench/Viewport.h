@@ -1,9 +1,10 @@
 #ifndef UI_VIEWPORT_H
 #define UI_VIEWPORT_H
 
-#include "../renderer/Renderer.h"
-#include "../renderer/Camera.h"
-#include "../window/Window.h"
+#include "renderer/Renderer.h"
+#include "renderer/Camera.h"
+#include "window/Window.h"
+#include "scene/Scene.h"
 
 #include <memory>
 #include <vector>
@@ -12,25 +13,9 @@
 
 struct SceneObject;
 
-class Viewport {
-private:
-    std::unique_ptr<Renderer> m_renderer;
-    std::unique_ptr<Camera> m_camera;
-    Window* m_window; // Reference to the window
-    
-    // Viewport settings
-    bool m_showGrid = true;
-    
-    // Mouse interaction state
-    bool m_isRotating = false;
-    bool m_isPanning = false;
-    
-    // Callbacks for object selection
-    std::function<void(int)> m_onObjectSelected;
-    std::function<const std::vector<SceneObject>&()> m_getSceneObjects;
-    
+class Viewport {    
 public:
-    Viewport(Window* window);
+    Viewport(Window* window, Scene* scene = nullptr);
     ~Viewport();
     
     bool initialize();
@@ -70,6 +55,22 @@ public:
     Renderer* getRenderer() const { return m_renderer.get(); }
 
 private:
+    Scene* m_scene; // Scene containing all objects
+    std::unique_ptr<Renderer> m_renderer; // Renderer for drawing the scene
+    std::unique_ptr<Camera> m_camera; // Camera for viewing the scene
+    Window* m_window; // Reference to the window
+    
+    // Viewport settings
+    bool m_showGrid = true;
+    
+    // Mouse interaction state
+    bool m_isRotating = false;
+    bool m_isPanning = false;
+    
+    // Callbacks for object selection
+    std::function<void(int)> m_onObjectSelected;
+    std::function<const std::vector<SceneObject>&()> m_getSceneObjects;
+
     bool rayIntersectsTriangle(const glm::vec3& rayOrigin, const glm::vec3& rayDir, 
                               const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
                               float& distance);
