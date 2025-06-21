@@ -3,7 +3,8 @@
 
 #include "../renderer/Renderer.h"
 #include "../renderer/Camera.h"
-#include "Window.h"
+#include "../window/Window.h"
+
 #include <memory>
 #include <vector>
 #include <functional>

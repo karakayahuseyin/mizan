@@ -66,12 +66,12 @@ void Application::run() {
     }
 }
 
-void Application::update() {
-    m_rotation += 0.01f;
-    if (m_rotation > 6.28f) {
-        m_rotation = 0.0f;
-    }
-}
+// void Application::update() {
+//     m_rotation += 0.01f;
+//     if (m_rotation > 6.28f) {
+//         m_rotation = 0.0f;
+//     }
+// }
 
 void Application::render() {
     m_window->clear();

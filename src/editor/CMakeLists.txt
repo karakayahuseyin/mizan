@@ -48,9 +48,12 @@ configure_file(${EDITOR_DIR}/renderer/shaders/wireframe.frag ${CMAKE_BINARY_DIR}
 add_executable(${PROJECT_NAME}Editor
     ${EDITOR_DIR}/main.cpp
     ${EDITOR_DIR}/Application.cpp
-    ${EDITOR_DIR}/ui/Window.cpp
-    ${EDITOR_DIR}/ui/Viewport.cpp
-    ${EDITOR_DIR}/ui/UIManager.cpp
+    ${EDITOR_DIR}/window/Window.cpp
+    ${EDITOR_DIR}/window/UIManager.cpp
+    ${EDITOR_DIR}/workbench/Workbench.cpp
+    ${EDITOR_DIR}/workbench/Viewport.cpp
+    ${EDITOR_DIR}/workbench/Toolkit.cpp 
+    ${EDITOR_DIR}/renderer/Mesh.cpp
     ${EDITOR_DIR}/renderer/Tessellator.cpp
     ${EDITOR_DIR}/renderer/Renderer.cpp
     ${EDITOR_DIR}/renderer/VertexArray.cpp
