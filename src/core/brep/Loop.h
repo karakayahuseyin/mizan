@@ -1,7 +1,7 @@
 #ifndef BREP_LOOP_H
 #define BREP_LOOP_H
 
-#include "BREPTypes.h"
+#include "Types.h"
 #include <vector>
 
 namespace BREP {

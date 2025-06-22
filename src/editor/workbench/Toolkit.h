@@ -4,6 +4,10 @@
 #include "window/Window.h"
 #include "modeller/Modeller.h"
 #include "scene/Scene.h"
+#include "brep/Solid.h"
+
+#include <memory>
+#include <string>
 
 /**
  * Toolkit is a ui module that provides a set of tools and utilities
@@ -24,6 +28,8 @@ private:
     Window* m_window = nullptr; // Pointer to the main application window for drawing ImGui elements
     Scene* m_scene = nullptr; // Pointer to the scene containing all objects for interaction
     mizan::Modeller* m_modeller = nullptr; // Pointer to the Modeller instance for modelling operations
+
+    void addSolid(std::string name, BREP::Solid::PrimitiveType type);
 };
 
 #endif // TOOLKIT_H

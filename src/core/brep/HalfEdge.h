@@ -1,13 +1,13 @@
 #ifndef BREP_HALFEDGE_H
 #define BREP_HALFEDGE_H
 
-#include "BREPTypes.h"
+#include "Types.h"
 #include <memory>
 
 namespace BREP {
 
 class HalfEdge {
-    friend class BREPBuilder; // Allow BREPBuilder to access private members
+    friend class Builder; // Allow BREPBuilder to access private members
     
 private:
     static uint32_t s_nextId;

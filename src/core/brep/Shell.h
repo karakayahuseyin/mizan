@@ -1,7 +1,7 @@
 #ifndef BREP_SHELL_H
 #define BREP_SHELL_H
 
-#include "BREPTypes.h"
+#include "Types.h"
 #include <vector>
 #include <unordered_set>
 

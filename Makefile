@@ -1,5 +1,6 @@
 BUILD_DIR = build
-EXECUTABLE = $(BUILD_DIR)/bin/MizanEditor
+BIN_DIR = bin
+EXECUTABLE = MizanEditor
 
 .PHONY: all build run clean
 
@@ -11,7 +12,6 @@ build:
 	cd $(BUILD_DIR) && make
 
 run: build
-	./$(EXECUTABLE)
-
+	cd $(BUILD_DIR)/$(BIN_DIR) && ./$(EXECUTABLE)
 clean:
 	rm -rf $(BUILD_DIR)

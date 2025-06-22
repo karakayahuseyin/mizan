@@ -8,7 +8,8 @@ Workbench::~Workbench() {
 }
 
 bool Workbench::init() {
-    
+
+    m_scene = new Scene();
     m_toolkit = std::make_unique<Toolkit>(m_window, m_scene);
     m_viewport = std::make_unique<Viewport>(m_window, m_scene);
     

@@ -1,7 +1,7 @@
 #ifndef ASSEMBLY_H
 #define ASSEMBLY_H
 
-#include <BREPTypes.h>
+#include "Types.h"
 
 namespace BREP {
 

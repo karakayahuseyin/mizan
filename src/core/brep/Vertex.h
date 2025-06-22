@@ -1,7 +1,7 @@
 #ifndef BREP_VERTEX_H
 #define BREP_VERTEX_H
 
-#include "BREPTypes.h"
+#include "Types.h"
 #include <glm/glm.hpp>
 #include <memory>
 #include <vector>

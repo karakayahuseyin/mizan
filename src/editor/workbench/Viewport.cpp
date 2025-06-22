@@ -9,7 +9,11 @@
 #include <limits>
 
 Viewport::Viewport(Window* window, Scene* scene) 
-    : m_window(window), m_renderer(nullptr), m_camera(nullptr) {
+    : m_window(window), m_scene(scene) {
+    // Register scene callbacks if scene is provided
+    if (m_scene) {
+        registerSceneCallbacks();
+    }
 }
 
 Viewport::~Viewport() {
@@ -175,21 +179,21 @@ int Viewport::performRaycast(double mouseX, double mouseY) {
         
         // Transform ray to object space
         glm::mat4 modelMatrix = glm::mat4(1.0f);
-        modelMatrix = glm::translate(modelMatrix, glm::vec3(mesh->m_position[0], mesh->m_position[1], mesh->m_position[2]));
-        modelMatrix = glm::rotate(modelMatrix, glm::radians(mesh->m_rotation[0]), glm::vec3(1, 0, 0));
-        modelMatrix = glm::rotate(modelMatrix, glm::radians(mesh->m_rotation[1]), glm::vec3(0, 1, 0));
-        modelMatrix = glm::rotate(modelMatrix, glm::radians(mesh->m_rotation[2]), glm::vec3(0, 0, 1));
-        modelMatrix = glm::scale(modelMatrix, glm::vec3(mesh->m_scale[0], mesh->m_scale[1], mesh->m_scale[2]));
+        modelMatrix = glm::translate(modelMatrix, glm::vec3(mesh.m_position[0], mesh.m_position[1], mesh.m_position[2]));
+        modelMatrix = glm::rotate(modelMatrix, glm::radians(mesh.m_rotation[0]), glm::vec3(1, 0, 0));
+        modelMatrix = glm::rotate(modelMatrix, glm::radians(mesh.m_rotation[1]), glm::vec3(0, 1, 0));
+        modelMatrix = glm::rotate(modelMatrix, glm::radians(mesh.m_rotation[2]), glm::vec3(0, 0, 1));
+        modelMatrix = glm::scale(modelMatrix, glm::vec3(mesh.m_scale[0], mesh.m_scale[1], mesh.m_scale[2]));
         
         glm::mat4 invModelMatrix = glm::inverse(modelMatrix);
         glm::vec3 localRayOrigin = glm::vec3(invModelMatrix * glm::vec4(rayOrigin, 1.0f));
         glm::vec3 localRayDir = glm::normalize(glm::vec3(invModelMatrix * glm::vec4(rayDir, 0.0f)));
         
         // Test ray against all triangles in the mesh
-        for (const auto& triangle : mesh->m_triangles) {
-            const auto& v0 = mesh->m_vertices[triangle.indices[0]].position;
-            const auto& v1 = mesh->m_vertices[triangle.indices[1]].position;
-            const auto& v2 = mesh->m_vertices[triangle.indices[2]].position;
+        for (const auto& triangle : mesh.m_triangles) {
+            const auto& v0 = mesh.m_vertices[triangle.indices[0]].position;
+            const auto& v1 = mesh.m_vertices[triangle.indices[1]].position;
+            const auto& v2 = mesh.m_vertices[triangle.indices[2]].position;
             
             glm::vec3 vert0(v0[0], v0[1], v0[2]);
             glm::vec3 vert1(v1[0], v1[1], v1[2]);
@@ -268,4 +272,17 @@ glm::vec3 Viewport::screenToWorldRay(double mouseX, double mouseY) {
     glm::vec4 rayWorld = glm::inverse(viewMatrix) * rayEye;
     
     return glm::normalize(glm::vec3(rayWorld));
+}
+
+void Viewport::onSceneObjectAdded(const SceneObject& object) {
+    // Automatically load the mesh when an object is added to the scene
+    loadMesh(object.mesh);
+}
+
+void Viewport::registerSceneCallbacks() {
+    if (m_scene) {
+        m_scene->setObjectAddedCallback([this](const SceneObject& object) {
+             onSceneObjectAdded(object);
+        });
+    }
 }

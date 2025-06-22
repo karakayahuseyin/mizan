@@ -1,7 +1,7 @@
 #ifndef BREP_FACE_H
 #define BREP_FACE_H
 
-#include "BREPTypes.h"
+#include "Types.h"
 #include <glm/glm.hpp>
 #include <vector>
 

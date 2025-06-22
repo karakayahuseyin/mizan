@@ -5,8 +5,9 @@
 
 namespace BREP {
 
-class BREPBuilder {
+class Builder {
 public:
+    static Solid createSolid(Solid::PrimitiveType type);
     static Solid createCubeSolid(float size = 1.0f);
     static Solid createPyramidSolid(float size = 1.0f);
     static Solid createSphereSolid(float radius = 1.0f, int latitudeSegments = 16, int longitudeSegments = 32);

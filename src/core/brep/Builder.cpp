@@ -1,15 +1,31 @@
-#include "BREPBuilder.h"
+#include "Builder.h"
 #include "Shell.h"
 #include "Face.h"
 #include "Loop.h"
 #include "Vertex.h"
 #include "HalfEdge.h"
 #include "Edge.h"
+
 #include <memory>
 
 namespace BREP {
 
-Solid BREPBuilder::createCubeSolid(float size) {
+Solid Builder::createSolid(Solid::PrimitiveType type) {
+    switch (type) {
+        case Solid::PrimitiveType::Cube:
+            return createCubeSolid();
+        case Solid::PrimitiveType::Pyramid:
+            return createPyramidSolid();
+        case Solid::PrimitiveType::Sphere:
+            return createSphereSolid();
+        case Solid::PrimitiveType::Cylinder:
+            return createCylinderSolid();
+        default:
+            return Solid(); // Return an empty solid for unsupported types
+    }
+}
+
+Solid Builder::createCubeSolid(float size) {
     Solid solid;
     float half = size * 0.5f;
     
@@ -68,7 +84,7 @@ Solid BREPBuilder::createCubeSolid(float size) {
     return solid;
 }
 
-Solid BREPBuilder::createPyramidSolid(float size) {
+Solid Builder::createPyramidSolid(float size) {
     Solid solid;
     float half = size * 0.5f;
     float height = size * 0.8f;
@@ -118,7 +134,7 @@ Solid BREPBuilder::createPyramidSolid(float size) {
     return solid;
 }
 
-Solid BREPBuilder::createGridSolid(int size, float spacing) {
+Solid Builder::createGridSolid(int size, float spacing) {
     Solid solid;
     float halfSize = size * spacing * 0.5f;
     
@@ -156,7 +172,7 @@ Solid BREPBuilder::createGridSolid(int size, float spacing) {
     return solid;
 }
 
-Solid BREPBuilder::createCylinderSolid(float radius, float height, int segments) {
+Solid Builder::createCylinderSolid(float radius, float height, int segments) {
     Solid solid;
     float halfHeight = height * 0.5f;
     
@@ -248,7 +264,7 @@ Solid BREPBuilder::createCylinderSolid(float radius, float height, int segments)
     return solid;
 }
 
-Solid BREPBuilder::createSphereSolid(float radius, int latitudeSegments, int longitudeSegments) {
+Solid Builder::createSphereSolid(float radius, int latitudeSegments, int longitudeSegments) {
     Solid solid;
     
     // Create vertices
@@ -338,7 +354,7 @@ Solid BREPBuilder::createSphereSolid(float radius, int latitudeSegments, int lon
     return solid;
 }
 
-LoopPtr BREPBuilder::createSimpleLoop(const std::vector<VertexPtr>& vertices) {
+LoopPtr Builder::createSimpleLoop(const std::vector<VertexPtr>& vertices) {
     if (vertices.size() < 3) {
         return nullptr;
     }
@@ -366,7 +382,7 @@ LoopPtr BREPBuilder::createSimpleLoop(const std::vector<VertexPtr>& vertices) {
     return loop;
 }
 
-void BREPBuilder::connectHalfEdges(const std::vector<HalfEdgePtr>& halfEdges) {
+void Builder::connectHalfEdges(const std::vector<HalfEdgePtr>& halfEdges) {
     if (halfEdges.empty()) return;
     
     // Connect each half-edge to the next one

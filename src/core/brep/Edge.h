@@ -1,7 +1,7 @@
 #ifndef BREP_EDGE_H
 #define BREP_EDGE_H
 
-#include "BREPTypes.h"
+#include "Types.h"
 #include <glm/glm.hpp>
 
 namespace BREP {

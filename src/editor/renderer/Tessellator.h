@@ -1,7 +1,7 @@
 #ifndef TESSELLATOR_H
 #define TESSELLATOR_H
 
-#include "brep/BREPTypes.h"
+#include "brep/Types.h"
 #include "Mesh.h"
 
 #include <memory>

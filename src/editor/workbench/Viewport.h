@@ -50,6 +50,10 @@ public:
         m_getSceneObjects = callback;
     }
     
+    // Scene change handling
+    void onSceneObjectAdded(const SceneObject& object);
+    void registerSceneCallbacks();
+
     // Getters
     Camera* getCamera() const { return m_camera.get(); }
     Renderer* getRenderer() const { return m_renderer.get(); }

@@ -1,6 +1,6 @@
 #include "Renderer.h"
 #include "Tessellator.h"
-#include "brep/BREPBuilder.h"
+#include "brep/Builder.h"
 
 #include <iostream>
 #include <GL/glu.h>
@@ -30,7 +30,7 @@ void Renderer::initialize() {
     }
     
     // Create grid mesh using BREP and tessellation
-    BREP::Solid gridSolid = BREP::BREPBuilder::createGridSolid(20, 0.5f);
+    BREP::Solid gridSolid = BREP::Builder::createGridSolid(20, 0.5f);
     m_gridMesh = Tessellator::tessellate(gridSolid);
     // Don't set static colors - use dynamic grid color
     m_gridMesh.m_showSolid = false;  // Grid should only show wireframe

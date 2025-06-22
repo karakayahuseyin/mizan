@@ -8,8 +8,8 @@
 #include <memory>
 
 struct SceneObject {
-    std::shared_ptr<BREP::Solid> solid;
-    std::shared_ptr<Mesh> mesh;
+    BREP::Solid solid;
+    Mesh mesh;
     std::string name;
     int id;
     bool visible = true;

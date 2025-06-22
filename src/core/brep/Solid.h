@@ -7,13 +7,21 @@
 namespace BREP {
 
 class Solid {
-private:
-    std::vector<std::shared_ptr<Shell>> m_shells;
-
 public:
+    enum class PrimitiveType {
+        Cube,
+        Sphere,
+        Cylinder,
+        Pyramid,
+        Cone,
+        Torus
+    };
+
     void addShell(std::shared_ptr<Shell> shell);
     const std::vector<std::shared_ptr<Shell>>& getShells() const;
     bool isValid() const;
+private:
+    std::vector<std::shared_ptr<Shell>> m_shells;
 };
 
 } // namespace BREP

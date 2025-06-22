@@ -1,6 +1,6 @@
 #include "Scene.h"
 #include "renderer/Tessellator.h"
-#include "brep/BREPBuilder.h"
+#include "brep/Builder.h"
 #include "logger/Logger.h"
 
 Scene::Scene() {
@@ -12,10 +12,8 @@ Scene::~Scene() {
     m_sceneObjects.clear();
 }
 
-void Scene::addObject(const std::string& type) {
-    Logger::log("Adding object of type: ", Logger::LogLevel::Info);
-}
-
-void Scene::addSolid(const BREP::Solid& solid, const std::string& name) {
-    Logger::log("Adding solid: ", Logger::LogLevel::Info);
+void Scene::addObject(SceneObject& object) {
+    // object.id = getNextObjectId();
+    m_sceneObjects.push_back(object);
+    m_onObjectAddedCallback(object);
 }
