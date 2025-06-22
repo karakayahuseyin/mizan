@@ -29,11 +29,6 @@ void Toolkit::update() {
 void Toolkit::render() {
     m_window->beginImGuiFrame();
 
-    ImGui::Begin("Toolkit");
-    ImGui::Text("Welcome to the Mizan Editor Toolkit!");
-    ImGui::Text("This toolkit provides various tools for modelling and scene management.");
-    ImGui::End();
-
     // Add a button to create a new solid
     if (ImGui::Button("Add Cube")) {
         addSolid("Cube", BREP::Solid::PrimitiveType::Cube);
@@ -47,7 +42,7 @@ void Toolkit::render() {
     if (ImGui::Button("Add Pyramid")) {
         addSolid("Pyramid", BREP::Solid::PrimitiveType::Pyramid);
     }
-
+    
     m_window->endImGuiFrame();
 }
 
@@ -57,36 +52,28 @@ void Toolkit::cleanup() {
 
 void Toolkit::addSolid(std::string name, BREP::Solid::PrimitiveType type) {
     if (!m_scene) {
-        // Scene is null, cannot add objects
+        Logger::error("Scene is not initialized. Cannot add solid.");
         return;
     }
 
-    if (!m_modeller) {
-        m_modeller = new mizan::Modeller();
+    SceneObject newObject;
+    newObject.name = name;
+
+    newObject.solid = BREP::Builder::createSolid(type);
+    newObject.mesh = Tessellator::tessellate(newObject.solid);
+
+    if (newObject.mesh.getVertexCount() == 0) {
+        Logger::error("Tessellation failed. Mesh is empty. Cannot add solid.");
+        return;
     }
 
-    try {
-        SceneObject newObject;
-        newObject.name = name;
+    newObject.mesh.setColor(0.75f, 0.75f, 0.75f);
+    newObject.mesh.m_showWireframe = true;
+    newObject.mesh.m_showSolid = true;
 
-        // Create solid with error checking
-        newObject.solid = BREP::Builder::createSolid(type);
-
-        // Tessellate with error checking
-        newObject.mesh = Tessellator::tessellate(newObject.solid);
-
-        // Validate mesh before proceeding
-        if (newObject.mesh.getVertexCount() == 0) {
-            // Empty mesh, skip adding
-            return;
-        }
-
-        newObject.mesh.setColor(0.75f, 0.75f, 0.75f);
-        newObject.mesh.m_showWireframe = true;
-        newObject.mesh.m_showSolid = true;
-
-        m_scene->addObject(newObject);
-    } catch (const std::exception& e) {
-        Logger::log(e.what(), Logger::LogLevel::Error);
+    if (m_scene->addObject(newObject)) {
+        Logger::info("Solid added successfully.");
+    } else {
+        Logger::error("Failed to add solid.");
     }
 }

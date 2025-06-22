@@ -12,7 +12,7 @@ public:
     ~Scene();
 
     // Object management
-    void addObject(SceneObject& object);
+    bool addObject(SceneObject& object);
     void removeObject(int objectId);
     void selectObject(int objectId);
     SceneObject* getSelectedObject();

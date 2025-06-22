@@ -1,6 +1,7 @@
 #include "Renderer.h"
 #include "Tessellator.h"
 #include "brep/Builder.h"
+#include "logger/Logger.h"
 
 #include <iostream>
 #include <GL/glu.h>
@@ -25,7 +26,7 @@ void Renderer::initialize() {
     
     // Initialize shaders
     if (!initializeShaders()) {
-        std::cerr << "Failed to initialize shaders!" << std::endl;
+        Logger::error("Failed to initialize shaders!");
         return;
     }
     
@@ -62,6 +63,8 @@ void Renderer::initialize() {
     
     // Disable blending for solid surfaces
     glDisable(GL_BLEND);
+    
+    Logger::info("Renderer initialized successfully");
 }
 
 void Renderer::loadMesh(const Mesh& mesh) {
@@ -138,9 +141,6 @@ void Renderer::renderSolid(const Mesh& mesh, GLuint vbo, GLuint ebo) {
     
     // Temporarily disable face culling to see all faces
     glDisable(GL_CULL_FACE);
-    // glEnable(GL_CULL_FACE);
-    // glCullFace(GL_BACK);
-    // glFrontFace(GL_CCW);
     
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
     
@@ -181,7 +181,7 @@ void Renderer::renderSolid(const Mesh& mesh, GLuint vbo, GLuint ebo) {
     // Check for any OpenGL errors
     GLenum err;
     while ((err = glGetError()) != GL_NO_ERROR) {
-        std::cerr << "OpenGL error in renderSolid: " << err << std::endl;
+        Logger::logf(Logger::LogLevel::Error, "OpenGL error in renderSolid", err);
     }
     
     m_vertexArray->unbind();
@@ -365,6 +365,7 @@ bool Renderer::initializeShaders() {
     
     // Load basic shader
     if (!m_basicShader->loadFromFile("shaders/basic.vert", "shaders/basic.frag")) {
+        Logger::warning("Could not load basic shader from files, using embedded shaders");
         // Fallback to embedded shaders if files don't exist
         std::string vertexSource = R"(
             #version 330 core
@@ -410,12 +411,14 @@ bool Renderer::initializeShaders() {
         )";
         
         if (!m_basicShader->loadFromSource(vertexSource, fragmentSource)) {
+            Logger::error("Failed to load basic shader from embedded source");
             return false;
         }
     }
     
     // Load wireframe shader
     if (!m_wireframeShader->loadFromFile("shaders/wireframe.vert", "shaders/wireframe.frag")) {
+        Logger::warning("Could not load wireframe shader from files, using embedded shaders");
         std::string wireVertSource = R"(
             #version 330 core
             layout (location = 0) in vec3 aPosition;
@@ -438,10 +441,12 @@ bool Renderer::initializeShaders() {
         )";
         
         if (!m_wireframeShader->loadFromSource(wireVertSource, wireFragSource)) {
+            Logger::error("Failed to load wireframe shader from embedded source");
             return false;
         }
     }
     
+    Logger::info("Shaders initialized successfully");
     return true;
 }
 

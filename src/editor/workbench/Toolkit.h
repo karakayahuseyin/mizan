@@ -25,9 +25,9 @@ public:
     void cleanup();
 
 private:
-    Window* m_window = nullptr; // Pointer to the main application window for drawing ImGui elements
-    Scene* m_scene = nullptr; // Pointer to the scene containing all objects for interaction
-    mizan::Modeller* m_modeller = nullptr; // Pointer to the Modeller instance for modelling operations
+    Window* m_window; // Pointer to the main application window for drawing ImGui elements
+    Scene* m_scene; // Pointer to the scene containing all objects for interaction
+    mizan::Modeller* m_modeller; // Pointer to the Modeller instance for modelling operations
 
     void addSolid(std::string name, BREP::Solid::PrimitiveType type);
 };

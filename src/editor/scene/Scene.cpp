@@ -12,8 +12,9 @@ Scene::~Scene() {
     m_sceneObjects.clear();
 }
 
-void Scene::addObject(SceneObject& object) {
+bool Scene::addObject(SceneObject& object) {
     // object.id = getNextObjectId();
     m_sceneObjects.push_back(object);
     m_onObjectAddedCallback(object);
+    return true;
 }

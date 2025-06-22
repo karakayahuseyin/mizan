@@ -1,4 +1,5 @@
 #include "Window.h"
+#include "logger/Logger.h"
 #include <iostream>
 
 Window::Window(int width, int height, const std::string& title)
@@ -15,7 +16,7 @@ Window::~Window() {
 
 bool Window::init() {
     if (!glfwInit()) {
-        std::cerr << "Failed to initialize GLFW\n";
+        Logger::error("Failed to initialize GLFW");
         return false;
     }
 
@@ -25,7 +26,7 @@ bool Window::init() {
 
     m_window = glfwCreateWindow(m_width, m_height, m_title.c_str(), nullptr, nullptr);
     if (!m_window) {
-        std::cerr << "Failed to create GLFW window\n";
+        Logger::error("Failed to create GLFW window");
         glfwTerminate();
         return false;
     }
@@ -34,7 +35,7 @@ bool Window::init() {
     glewExperimental = GL_TRUE;
 
     if (glewInit() != GLEW_OK) {
-        std::cerr << "Failed to initialize GLEW\n";
+        Logger::error("Failed to initialize GLEW");
         return false;
     }
 
@@ -43,13 +44,14 @@ bool Window::init() {
     glEnable(GL_DEPTH_TEST);
 
     if (!initImGui()) {
-        std::cerr << "Failed to initialize ImGui\n";
+        Logger::error("Failed to initialize ImGui");
         return false;
     }
     
     // Set up mouse callbacks
     setMouseCallbacks();
-
+    
+    Logger::info("Window initialized successfully");
     return true;
 }
 
@@ -172,6 +174,9 @@ void Window::mouseButtonCallback(GLFWwindow* window, int button, int action, int
     Window* win = static_cast<Window*>(glfwGetWindowUserPointer(window));
     if (win && button >= 0 && button < 3) {
         win->m_mouseButtonPressed[button] = (action == GLFW_PRESS);
+        if (action == GLFW_PRESS) {
+            Logger::debug("Mouse button pressed: " + std::to_string(button));
+        }
     }
 }
 
@@ -241,6 +246,8 @@ void Window::framebufferSizeCallback(GLFWwindow* window, int width, int height) 
         
         // Update OpenGL viewport
         glViewport(0, 0, width, height);
+        
+        Logger::debug("Window resized to: " + std::to_string(width) + "x" + std::to_string(height));
         
         // Call user-defined resize callback
         if (win->m_resizeCallback) {

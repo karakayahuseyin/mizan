@@ -1,4 +1,5 @@
 #include "Shader.h"
+#include "logger/Logger.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -88,7 +89,7 @@ GLuint Shader::compileShader(const std::string& source, GLenum shaderType) {
 std::string Shader::readFile(const std::string& filepath) {
     std::ifstream file(filepath);
     if (!file.is_open()) {
-        std::cerr << "Failed to open shader file: " << filepath << std::endl;
+        Logger::logf(Logger::LogLevel::Error, "Failed to open shader file", filepath);
         return "";
     }
     
@@ -103,7 +104,7 @@ void Shader::checkCompileErrors(GLuint shader, const std::string& type) {
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
     if (!success) {
         glGetShaderInfoLog(shader, 1024, nullptr, infoLog);
-        std::cerr << "Shader compilation error (" << type << "): " << infoLog << std::endl;
+        Logger::logf(Logger::LogLevel::Error, "Shader compilation error", type, infoLog);
     }
 }
 
@@ -113,7 +114,7 @@ void Shader::checkLinkErrors(GLuint program) {
     glGetProgramiv(program, GL_LINK_STATUS, &success);
     if (!success) {
         glGetProgramInfoLog(program, 1024, nullptr, infoLog);
-        std::cerr << "Shader linking error: " << infoLog << std::endl;
+        Logger::logf(Logger::LogLevel::Error, "Shader linking error", infoLog);
     }
 }
 
