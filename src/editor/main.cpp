@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2025 Hüseyin Karakaya
+ * This file is part of the Mizan project. Licensed under the MIT License (MIT).
+ */
+
 #include "Application.h"
 #include <iostream>
 
@@ -8,9 +13,6 @@ int main() {
         std::cerr << "Failed to initialize application\n";
         return -1;
     }
-
-    // Create test objects after initialization
-    // app.addTestObjects();
 
     app.run();
     
