@@ -41,6 +41,7 @@ namespace Icons {
     constexpr const char* SPHERE = "\uf111";
     constexpr const char* CYLINDER = "\uf1b3";
     constexpr const char* CONE = "\uf06a";
+    constexpr const char* TORUS = "\uf111";
     constexpr const char* PLANE = "\uf072";
     constexpr const char* LINE = "\uf068";
     constexpr const char* POINT = "\uf111";
@@ -55,4 +56,48 @@ namespace Icons {
     constexpr const char* ROTATE = "\uf01e";
     constexpr const char* SCALE = "\uf065";
     constexpr const char* MOVE = "\uf047";
+    
+    // Boolean operations
+    constexpr const char* UNION = "\uf067";
+    constexpr const char* SUBTRACT = "\uf068";
+    constexpr const char* INTERSECT = "\uf1db";
+    
+    // Modeling operations
+    constexpr const char* EXTRUDE = "\uf062";
+    constexpr const char* REVOLVE = "\uf01e";
+    constexpr const char* MIRROR = "\uf074";
+    
+    // Grid and layout
+    constexpr const char* GRID = "\uf00a";
+    
+    // Selection tools
+    constexpr const char* SELECT = "\uf245";
+    constexpr const char* CURSOR = "\uf245";
+    constexpr const char* BOX_SELECT = "\uf096";
+    constexpr const char* LASSO = "\uf1db";
+    constexpr const char* SELECT_ALL = "\uf0c9";
+    constexpr const char* DESELECT = "\uf00d";
+    constexpr const char* INVERT_SELECTION = "\uf074";
+    
+    // Rendering and display
+    constexpr const char* RENDER = "\uf03d";
+    constexpr const char* WIREFRAME_MODE = "\uf1ec";
+    constexpr const char* POINTS = "\uf111";
+    constexpr const char* NORMALS = "\uf062";
+    constexpr const char* BOUNDING_BOX = "\uf096";
+    
+    // Scene and hierarchy
+    constexpr const char* SCENE = "\uf1b2";
+    constexpr const char* HIERARCHY = "\uf0e8";
+    
+    // Actions and operations
+    constexpr const char* RESET = "\uf0e2";
+    constexpr const char* APPLY = "\uf00c";
+    constexpr const char* PALETTE = "\uf53f";
+    
+    // Material types
+    constexpr const char* METAL = "\uf1b2";
+    constexpr const char* PLASTIC = "\uf111";
+    constexpr const char* GLASS = "\uf06e";
+    constexpr const char* WOOD = "\uf1bb";
 }
