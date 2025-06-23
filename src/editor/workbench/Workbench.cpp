@@ -43,8 +43,13 @@ void Workbench::cleanup() {
         m_toolkit->cleanup();
     }
 
-    delete m_window;
+    // Delete the scene if we created it
+    if (m_scene) {
+        delete m_scene;
+        m_scene = nullptr;
+    }
     
+    // Don't delete m_window - it's owned by Application
     // m_viewport.reset();
     // m_toolkit.reset();
 }
