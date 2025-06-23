@@ -48,7 +48,7 @@ void HalfEdge::setNext(HalfEdgePtr next) {
 }
 
 void HalfEdge::setPrev(HalfEdgePtr prev) {
-    m_prev = prev;
+    m_prev = prev;  // weak_ptr assignment
     // Don't set reciprocal relationship to avoid shared_ptr issues
     // if (prev && prev->getNext().get() != this) {
     //     prev->m_next = std::shared_ptr<HalfEdge>(this);
@@ -60,7 +60,7 @@ void HalfEdge::setEdge(EdgePtr edge) {
 }
 
 void HalfEdge::setFace(FacePtr face) {
-    m_face = face;
+    m_face = face;  // weak_ptr assignment
 }
 
 glm::vec3 HalfEdge::getVector() const {
@@ -89,8 +89,9 @@ HalfEdgePtr HalfEdge::getNextAroundOrigin() const {
 }
 
 HalfEdgePtr HalfEdge::getPrevAroundOrigin() const {
-    if (m_prev && m_prev->getTwin()) {
-        return m_prev->getTwin();
+    auto prev = m_prev.lock();
+    if (prev && prev->getTwin()) {
+        return prev->getTwin();
     }
     return nullptr;
 }
@@ -121,13 +122,14 @@ bool HalfEdge::isValid() const {
     
     // Check next/prev relationship
     if (m_next && m_next->getPrev().get() != this) return false;
-    if (m_prev && m_prev->getNext().get() != this) return false;
+    auto prev = m_prev.lock();
+    if (prev && prev->getNext().get() != this) return false;
     
     return true;
 }
 
 bool HalfEdge::isBoundary() const {
-    return m_face == nullptr;
+    return m_face.expired();  // Check if weak_ptr is expired (face is null)
 }
 
 } // namespace BREP

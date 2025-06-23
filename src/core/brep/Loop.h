@@ -12,7 +12,7 @@ private:
     uint32_t m_id;
     
     HalfEdgePtr m_startHalfEdge;
-    FacePtr m_face;
+    std::weak_ptr<Face> m_face;  // Use weak_ptr to break circular dependency
     bool m_isOuter; // True for outer loop, false for inner loop (hole)
 
 public:
@@ -22,13 +22,13 @@ public:
     // Getters
     uint32_t getId() const { return m_id; }
     HalfEdgePtr getStartHalfEdge() const { return m_startHalfEdge; }
-    FacePtr getFace() const { return m_face; }
+    FacePtr getFace() const { return m_face.lock(); }  // Convert weak_ptr to shared_ptr
     bool isOuter() const { return m_isOuter; }
     bool isInner() const { return !m_isOuter; }
 
     // Setters
     void setStartHalfEdge(HalfEdgePtr halfEdge) { m_startHalfEdge = halfEdge; }
-    void setFace(FacePtr face) { m_face = face; }
+    void setFace(FacePtr face) { m_face = face; }  // weak_ptr assignment
     void setOuter(bool isOuter) { m_isOuter = isOuter; }
 
     // Traversal methods

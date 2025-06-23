@@ -354,14 +354,6 @@ void Builder::connectHalfEdges(const std::vector<HalfEdgePtr>& halfEdges) {
         
         halfEdges[i]->setNext(halfEdges[nextIndex]);
         halfEdges[i]->setPrev(halfEdges[prevIndex]);
-        
-        // Set up the reciprocal relationships manually to avoid shared_ptr issues
-        if (halfEdges[nextIndex]) {
-            halfEdges[nextIndex]->m_prev = halfEdges[i];
-        }
-        if (halfEdges[prevIndex]) {
-            halfEdges[prevIndex]->m_next = halfEdges[i];
-        }
     }
 }
 

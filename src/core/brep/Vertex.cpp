@@ -13,21 +13,49 @@ Vertex::Vertex(const glm::vec3& position)
     : m_id(s_nextId++), m_position(position) {
 }
 
+std::vector<HalfEdgePtr> Vertex::getOutgoingHalfEdges() const {
+    std::vector<HalfEdgePtr> result;
+    for (const auto& weakHe : m_outgoingHalfEdges) {
+        if (auto he = weakHe.lock()) {
+            result.push_back(he);
+        }
+    }
+    return result;
+}
+
 void Vertex::addOutgoingHalfEdge(HalfEdgePtr halfEdge) {
     if (halfEdge && halfEdge->getOrigin().get() == this) {
-        m_outgoingHalfEdges.insert(halfEdge);
+        // Check if already exists to avoid duplicates
+        auto it = std::find_if(m_outgoingHalfEdges.begin(), m_outgoingHalfEdges.end(),
+            [halfEdge](const std::weak_ptr<HalfEdge>& weak) {
+                auto locked = weak.lock();
+                return locked && locked == halfEdge;
+            });
+        
+        if (it == m_outgoingHalfEdges.end()) {
+            m_outgoingHalfEdges.push_back(halfEdge);
+        }
     }
 }
 
 void Vertex::removeOutgoingHalfEdge(HalfEdgePtr halfEdge) {
-    m_outgoingHalfEdges.erase(halfEdge);
+    auto it = std::find_if(m_outgoingHalfEdges.begin(), m_outgoingHalfEdges.end(),
+        [halfEdge](const std::weak_ptr<HalfEdge>& weak) {
+            auto locked = weak.lock();
+            return locked && locked == halfEdge;
+        });
+    
+    if (it != m_outgoingHalfEdges.end()) {
+        m_outgoingHalfEdges.erase(it);
+    }
 }
 
 std::vector<EdgePtr> Vertex::getIncidentEdges() const {
     std::vector<EdgePtr> edges;
     std::unordered_set<EdgePtr> edgeSet;
     
-    for (const auto& halfEdge : m_outgoingHalfEdges) {
+    auto outgoingHalfEdges = getOutgoingHalfEdges();
+    for (const auto& halfEdge : outgoingHalfEdges) {
         if (halfEdge && halfEdge->getEdge()) {
             edgeSet.insert(halfEdge->getEdge());
         }
@@ -45,7 +73,8 @@ std::vector<FacePtr> Vertex::getIncidentFaces() const {
     std::vector<FacePtr> faces;
     std::unordered_set<FacePtr> faceSet;
     
-    for (const auto& halfEdge : m_outgoingHalfEdges) {
+    auto outgoingHalfEdges = getOutgoingHalfEdges();
+    for (const auto& halfEdge : outgoingHalfEdges) {
         if (halfEdge && halfEdge->getFace()) {
             faceSet.insert(halfEdge->getFace());
         }
@@ -73,7 +102,8 @@ float Vertex::distanceTo(const glm::vec3& point) const {
 
 bool Vertex::isValid() const {
     // Check if all outgoing half-edges have this vertex as origin
-    for (const auto& halfEdge : m_outgoingHalfEdges) {
+    auto outgoingHalfEdges = getOutgoingHalfEdges();
+    for (const auto& halfEdge : outgoingHalfEdges) {
         if (!halfEdge || halfEdge->getOrigin().get() != this) {
             return false;
         }

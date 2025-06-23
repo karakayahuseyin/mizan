@@ -13,7 +13,7 @@ private:
     uint32_t m_id;
     
     std::vector<FacePtr> m_faces;
-    SolidPtr m_solid;
+    std::weak_ptr<Solid> m_solid;  // Use weak_ptr to break circular dependency
     bool m_isOuter; // True for outer shell, false for inner shell (cavity)
 
 public:
@@ -24,7 +24,7 @@ public:
     // Getters
     uint32_t getId() const { return m_id; }
     const std::vector<FacePtr>& getFaces() const { return m_faces; }
-    SolidPtr getSolid() const { return m_solid; }
+    SolidPtr getSolid() const { return m_solid.lock(); }  // Convert weak_ptr to shared_ptr
     bool isOuter() const { return m_isOuter; }
     bool isInner() const { return !m_isOuter; }
 

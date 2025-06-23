@@ -16,9 +16,9 @@ private:
     VertexPtr m_origin;
     HalfEdgePtr m_twin;
     HalfEdgePtr m_next;
-    HalfEdgePtr m_prev;
+    std::weak_ptr<HalfEdge> m_prev;  // Use weak_ptr to break circular dependency
     EdgePtr m_edge;
-    FacePtr m_face;
+    std::weak_ptr<Face> m_face;  // Use weak_ptr to break circular dependency
 
 public:
     HalfEdge(VertexPtr origin);
@@ -30,9 +30,9 @@ public:
     VertexPtr getDestination() const;
     HalfEdgePtr getTwin() const { return m_twin; }
     HalfEdgePtr getNext() const { return m_next; }
-    HalfEdgePtr getPrev() const { return m_prev; }
+    HalfEdgePtr getPrev() const { return m_prev.lock(); }  // Convert weak_ptr to shared_ptr
     EdgePtr getEdge() const { return m_edge; }
-    FacePtr getFace() const { return m_face; }
+    FacePtr getFace() const { return m_face.lock(); }  // Convert weak_ptr to shared_ptr
 
     // Setters
     void setOrigin(VertexPtr origin);
@@ -40,7 +40,7 @@ public:
     void setNext(HalfEdgePtr next);
     void setPrev(HalfEdgePtr prev);
     void setEdge(EdgePtr edge);
-    void setFace(FacePtr face);
+    void setFace(FacePtr face);  // weak_ptr assignment
 
     // Utility methods
     glm::vec3 getVector() const;

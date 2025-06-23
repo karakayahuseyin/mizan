@@ -14,7 +14,7 @@ private:
     
     LoopPtr m_outerLoop;
     std::vector<LoopPtr> m_innerLoops; // Holes
-    ShellPtr m_shell;
+    std::weak_ptr<Shell> m_shell;  // Use weak_ptr to break circular dependency
 
 public:
     Face(LoopPtr outerLoop);
@@ -25,11 +25,11 @@ public:
     LoopPtr getOuterLoop() const { return m_outerLoop; }
     const std::vector<LoopPtr>& getInnerLoops() const { return m_innerLoops; }
     std::vector<LoopPtr> getAllLoops() const;
-    ShellPtr getShell() const { return m_shell; }
+    ShellPtr getShell() const { return m_shell.lock(); }  // Convert weak_ptr to shared_ptr
 
     // Setters
     void setOuterLoop(LoopPtr loop);
-    void setShell(ShellPtr shell) { m_shell = shell; }
+    void setShell(ShellPtr shell) { m_shell = shell; }  // weak_ptr assignment
 
     // Loop management
     void addInnerLoop(LoopPtr loop);

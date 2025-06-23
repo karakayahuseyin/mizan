@@ -14,7 +14,7 @@ private:
     static uint32_t s_nextId;
     uint32_t m_id;
     glm::vec3 m_position;
-    std::unordered_set<HalfEdgePtr> m_outgoingHalfEdges;
+    std::vector<std::weak_ptr<HalfEdge>> m_outgoingHalfEdges;  // Use weak_ptr to break circular dependency
 
 public:
     Vertex(const glm::vec3& position);
@@ -23,7 +23,7 @@ public:
     // Getters
     uint32_t getId() const { return m_id; }
     const glm::vec3& getPosition() const { return m_position; }
-    const std::unordered_set<HalfEdgePtr>& getOutgoingHalfEdges() const { return m_outgoingHalfEdges; }
+    std::vector<HalfEdgePtr> getOutgoingHalfEdges() const;  // Convert weak_ptr to shared_ptr
 
     // Setters
     void setPosition(const glm::vec3& position) { m_position = position; }
