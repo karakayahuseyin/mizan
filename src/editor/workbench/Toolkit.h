@@ -5,6 +5,7 @@
 #include "modeller/Modeller.h"
 #include "scene/Scene.h"
 #include "brep/Solid.h"
+#include "renderer/Tessellator.h"
 
 #include <memory>
 #include <string>
@@ -29,7 +30,17 @@ private:
     Scene* m_scene; // Pointer to the scene containing all objects for interaction
     mizan::Modeller* m_modeller; // Pointer to the Modeller instance for modelling operations
 
+    // Tessellation testing parameters
+    TessellationParams m_tessellationParams;
+    bool m_showTessellationWindow = false;
+    int m_selectedPrimitive = 0;
+    bool m_autoUpdate = true;
+    bool m_showWireframe = false;
+    bool m_showStatistics = false;
+    
     void addSolid(std::string name, BREP::Solid::PrimitiveType type);
+    void renderTessellationTestWindow();
+    void updateTestObject();
 };
 
 #endif // TOOLKIT_H

@@ -44,6 +44,13 @@ configure_file(${EDITOR_DIR}/renderer/shaders/basic.vert ${CMAKE_BINARY_DIR}/bin
 configure_file(${EDITOR_DIR}/renderer/shaders/basic.frag ${CMAKE_BINARY_DIR}/bin/shaders/basic.frag COPYONLY)
 configure_file(${EDITOR_DIR}/renderer/shaders/wireframe.vert ${CMAKE_BINARY_DIR}/bin/shaders/wireframe.vert COPYONLY)
 configure_file(${EDITOR_DIR}/renderer/shaders/wireframe.frag ${CMAKE_BINARY_DIR}/bin/shaders/wireframe.frag COPYONLY)
+configure_file(${EDITOR_DIR}/renderer/shaders/tessellation.vert ${CMAKE_BINARY_DIR}/bin/shaders/tessellation.vert COPYONLY)
+configure_file(${EDITOR_DIR}/renderer/shaders/tessellation.frag ${CMAKE_BINARY_DIR}/bin/shaders/tessellation.frag COPYONLY)
+configure_file(${EDITOR_DIR}/renderer/shaders/tessellation.tesc ${CMAKE_BINARY_DIR}/bin/shaders/tessellation.tesc COPYONLY)
+configure_file(${EDITOR_DIR}/renderer/shaders/tessellation.tese ${CMAKE_BINARY_DIR}/bin/shaders/tessellation.tese COPYONLY)
+configure_file(${EDITOR_DIR}/renderer/shaders/tessellation_feedback.vert ${CMAKE_BINARY_DIR}/bin/shaders/tessellation_feedback.vert COPYONLY)
+configure_file(${EDITOR_DIR}/renderer/shaders/tessellation_feedback.tesc ${CMAKE_BINARY_DIR}/bin/shaders/tessellation_feedback.tesc COPYONLY)
+configure_file(${EDITOR_DIR}/renderer/shaders/tessellation_feedback.tese ${CMAKE_BINARY_DIR}/bin/shaders/tessellation_feedback.tese COPYONLY)
 
 add_executable(${PROJECT_NAME}Editor
     ${EDITOR_DIR}/main.cpp
