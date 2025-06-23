@@ -46,10 +46,7 @@ void Viewport::render() {
     m_renderer->setViewMatrix(viewMatrix);
     m_renderer->setCameraPosition(m_camera->getPosition());
     
-    // Render grid
-    m_renderer->enableGrid(m_showGrid);
-    
-    // Render 3D content
+    // Render 3D content (grid is now handled internally by renderer)
     m_renderer->render();
 }
 

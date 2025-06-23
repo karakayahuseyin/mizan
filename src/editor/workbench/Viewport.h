@@ -29,10 +29,6 @@ public:
     void handleMouseInput();
     void resetCamera();
     
-    // Rendering settings
-    void enableGrid(bool enable) { m_showGrid = enable; }
-    bool isGridEnabled() const { return m_showGrid; }
-    
     // Mesh management
     void loadMesh(const Mesh& mesh);
     void updateMesh(size_t index, const Mesh& mesh);
@@ -63,9 +59,6 @@ private:
     std::unique_ptr<Renderer> m_renderer; // Renderer for drawing the scene
     std::unique_ptr<Camera> m_camera; // Camera for viewing the scene
     Window* m_window; // Reference to the window
-    
-    // Viewport settings
-    bool m_showGrid = true;
     
     // Mouse interaction state
     bool m_isRotating = false;

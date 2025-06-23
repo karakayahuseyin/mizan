@@ -134,44 +134,6 @@ Solid Builder::createPyramidSolid(float size) {
     return solid;
 }
 
-Solid Builder::createGridSolid(int size, float spacing) {
-    Solid solid;
-    float halfSize = size * spacing * 0.5f;
-    
-    // Create vertices in a grid pattern
-    std::vector<std::vector<VertexPtr>> gridVertices(size + 1, std::vector<VertexPtr>(size + 1));
-    
-    for (int i = 0; i <= size; ++i) {
-        for (int j = 0; j <= size; ++j) {
-            float x = -halfSize + i * spacing;
-            float z = -halfSize + j * spacing;
-            gridVertices[i][j] = std::make_shared<Vertex>(glm::vec3(x, 0.0f, z));
-        }
-    }
-    
-    // Create shell
-    auto shell = std::make_shared<Shell>();
-    
-    // Create quad faces for each grid cell
-    for (int i = 0; i < size; ++i) {
-        for (int j = 0; j < size; ++j) {
-            // Create quad face for each grid cell (counter-clockwise)
-            std::vector<VertexPtr> quadVertices = {
-                gridVertices[i][j],
-                gridVertices[i+1][j],
-                gridVertices[i+1][j+1],
-                gridVertices[i][j+1]
-            };
-            auto loop = createSimpleLoop(quadVertices);
-            auto face = std::make_shared<Face>(loop);
-            shell->addFace(face);
-        }
-    }
-    
-    solid.addShell(shell);
-    return solid;
-}
-
 Solid Builder::createCylinderSolid(float radius, float height, int segments) {
     Solid solid;
     float halfHeight = height * 0.5f;

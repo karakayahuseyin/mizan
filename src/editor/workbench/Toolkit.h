@@ -5,6 +5,7 @@
 #include "modeller/Modeller.h"
 #include "scene/Scene.h"
 #include "brep/Solid.h"
+#include "Settings.h"
 
 #include <memory>
 #include <string>
@@ -30,6 +31,8 @@ private:
     mizan::Modeller* m_modeller; // Pointer to the Modeller instance for modelling operations
 
     void addSolid(std::string name, BREP::Solid::PrimitiveType type);
+    void renderMenuBar();
+    void renderToolPanel();
 };
 
 #endif // TOOLKIT_H

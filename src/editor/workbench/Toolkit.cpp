@@ -29,19 +29,11 @@ void Toolkit::update() {
 void Toolkit::render() {
     m_window->beginImGuiFrame();
 
-    // Add a button to create a new solid
-    if (ImGui::Button("Add Cube")) {
-        addSolid("Cube", BREP::Solid::PrimitiveType::Cube);
-    }
-    if (ImGui::Button("Add Sphere")) {
-        addSolid("Sphere", BREP::Solid::PrimitiveType::Sphere);
-    }
-    if (ImGui::Button("Add Cylinder")) {
-        addSolid("Cylinder", BREP::Solid::PrimitiveType::Cylinder);
-    }
-    if (ImGui::Button("Add Pyramid")) {
-        addSolid("Pyramid", BREP::Solid::PrimitiveType::Pyramid);
-    }
+    renderMenuBar();
+    renderToolPanel();
+    
+    // Render settings window if open
+    Settings::getInstance().renderSettingsWindow();
     
     m_window->endImGuiFrame();
 }
@@ -76,4 +68,85 @@ void Toolkit::addSolid(std::string name, BREP::Solid::PrimitiveType type) {
     } else {
         Logger::error("Failed to add solid.");
     }
+}
+
+void Toolkit::renderMenuBar() {
+    if (ImGui::BeginMainMenuBar()) {
+        if (ImGui::BeginMenu("File")) {
+            if (ImGui::MenuItem("New")) {
+                // Handle new file
+            }
+            if (ImGui::MenuItem("Open")) {
+                // Handle open file
+            }
+            if (ImGui::MenuItem("Save")) {
+                // Handle save file
+            }
+            ImGui::Separator();
+            if (ImGui::MenuItem("Exit")) {
+                // Handle exit
+            }
+            ImGui::EndMenu();
+        }
+        
+        if (ImGui::BeginMenu("View")) {
+            Settings& settings = Settings::getInstance();
+            if (ImGui::MenuItem("Settings")) {
+                settings.setSettingsWindowOpen(true);
+            }
+            ImGui::Separator();
+            if (ImGui::MenuItem("Reset Camera")) {
+                // Could add camera reset functionality here
+            }
+            ImGui::EndMenu();
+        }
+        
+        if (ImGui::BeginMenu("Tools")) {
+            if (ImGui::MenuItem("Reset Grid")) {
+                Settings& settings = Settings::getInstance();
+                settings.setGridSize(20.0f);
+                settings.setGridSpacing(0.5f);
+                settings.setGridColor(glm::vec3(0.5f, 0.5f, 0.5f));
+            }
+            ImGui::EndMenu();
+        }
+        
+        ImGui::EndMainMenuBar();
+    }
+}
+
+void Toolkit::renderToolPanel() {
+    // Create a tools panel window
+    if (ImGui::Begin("Tools")) {
+        ImGui::Text("Primitive Objects");
+        ImGui::Separator();
+        
+        // Add a button to create a new solid
+        if (ImGui::Button("Add Cube")) {
+            addSolid("Cube", BREP::Solid::PrimitiveType::Cube);
+        }
+        if (ImGui::Button("Add Sphere")) {
+            addSolid("Sphere", BREP::Solid::PrimitiveType::Sphere);
+        }
+        if (ImGui::Button("Add Cylinder")) {
+            addSolid("Cylinder", BREP::Solid::PrimitiveType::Cylinder);
+        }
+        if (ImGui::Button("Add Pyramid")) {
+            addSolid("Pyramid", BREP::Solid::PrimitiveType::Pyramid);
+        }
+        
+        ImGui::Separator();
+        ImGui::Text("Grid Settings");
+        
+        Settings& settings = Settings::getInstance();
+        bool gridEnabled = settings.isGridEnabled();
+        if (ImGui::Checkbox("Show Grid", &gridEnabled)) {
+            settings.setGridEnabled(gridEnabled);
+        }
+        
+        if (ImGui::Button("Open Settings")) {
+            settings.setSettingsWindowOpen(true);
+        }
+    }
+    ImGui::End();
 }
