@@ -11,7 +11,15 @@ void Settings::renderSettingsWindow() {
         return;
     }
     
-    if (ImGui::Begin("Settings", &m_showSettingsWindow)) {
+    // Set window size and position to center
+    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+    ImGui::SetNextWindowSize(ImVec2(600, 400), ImGuiCond_Appearing);
+    
+    // Make window non-resizable
+    ImGuiWindowFlags flags = ImGuiWindowFlags_NoResize;
+    
+    if (ImGui::Begin("Settings", &m_showSettingsWindow, flags)) {
         // Grid settings section
         if (ImGui::CollapsingHeader("Grid Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
             ImGui::Checkbox("Show Grid", &m_gridEnabled);

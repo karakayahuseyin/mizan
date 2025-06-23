@@ -143,10 +143,6 @@ void Toolkit::renderToolPanel() {
         if (ImGui::Checkbox("Show Grid", &gridEnabled)) {
             settings.setGridEnabled(gridEnabled);
         }
-        
-        if (ImGui::Button("Open Settings")) {
-            settings.setSettingsWindowOpen(true);
-        }
     }
     ImGui::End();
 }
