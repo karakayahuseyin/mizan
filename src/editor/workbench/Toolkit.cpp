@@ -3,6 +3,8 @@
 #include "brep/Solid.h"
 #include "renderer/Tessellator.h"
 #include "logger/Logger.h"
+#include "ui/Icons.h"
+#include "ui/IconUtils.h"
 
 #include <string>
 
@@ -73,17 +75,17 @@ void Toolkit::addSolid(std::string name, BREP::Solid::PrimitiveType type) {
 void Toolkit::renderMenuBar() {
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
-            if (ImGui::MenuItem("New")) {
+            if (IconUtils::IconMenuItem(Icons::FILE, "New", "Ctrl+N")) {
                 // Handle new file
             }
-            if (ImGui::MenuItem("Open")) {
+            if (IconUtils::IconMenuItem(Icons::FOLDER, "Open", "Ctrl+O")) {
                 // Handle open file
             }
-            if (ImGui::MenuItem("Save")) {
+            if (IconUtils::IconMenuItem(Icons::SAVE, "Save", "Ctrl+S")) {
                 // Handle save file
             }
             ImGui::Separator();
-            if (ImGui::MenuItem("Exit")) {
+            if (IconUtils::IconMenuItem(Icons::CROSS, "Exit", "Alt+F4")) {
                 // Handle exit
             }
             ImGui::EndMenu();
@@ -91,18 +93,18 @@ void Toolkit::renderMenuBar() {
         
         if (ImGui::BeginMenu("View")) {
             Settings& settings = Settings::getInstance();
-            if (ImGui::MenuItem("Settings")) {
+            if (IconUtils::IconMenuItem(Icons::SETTINGS, "Settings")) {
                 settings.setSettingsWindowOpen(true);
             }
             ImGui::Separator();
-            if (ImGui::MenuItem("Reset Camera")) {
+            if (IconUtils::IconMenuItem(Icons::HOME, "Reset Camera")) {
                 // Could add camera reset functionality here
             }
             ImGui::EndMenu();
         }
         
         if (ImGui::BeginMenu("Tools")) {
-            if (ImGui::MenuItem("Reset Grid")) {
+            if (IconUtils::IconMenuItem(Icons::REDO, "Reset Grid")) {
                 Settings& settings = Settings::getInstance();
                 settings.setGridSize(20.0f);
                 settings.setGridSpacing(0.5f);
@@ -118,30 +120,39 @@ void Toolkit::renderMenuBar() {
 void Toolkit::renderToolPanel() {
     // Create a tools panel window
     if (ImGui::Begin("Tools")) {
-        ImGui::Text("Primitive Objects");
+        // Primitive Objects section
+        if (IconUtils::IconCollapsingHeader(Icons::CUBE, "Primitive Objects", ImGuiTreeNodeFlags_DefaultOpen)) {
+            ImGui::Spacing();
+            
+            // Use IconButton for better visual appeal
+            if (IconUtils::IconButton(Icons::CUBE, "Add Cube")) {
+                addSolid("Cube", BREP::Solid::PrimitiveType::Cube);
+            }
+            
+            if (IconUtils::IconButton(Icons::SPHERE, "Add Sphere")) {
+                addSolid("Sphere", BREP::Solid::PrimitiveType::Sphere);
+            }
+            
+            if (IconUtils::IconButton(Icons::CYLINDER, "Add Cylinder")) {
+                addSolid("Cylinder", BREP::Solid::PrimitiveType::Cylinder);
+            }
+            
+            if (IconUtils::IconButton(Icons::CONE, "Add Pyramid")) {
+                addSolid("Pyramid", BREP::Solid::PrimitiveType::Pyramid);
+            }
+        }
+        
         ImGui::Separator();
         
-        // Add a button to create a new solid
-        if (ImGui::Button("Add Cube")) {
-            addSolid("Cube", BREP::Solid::PrimitiveType::Cube);
-        }
-        if (ImGui::Button("Add Sphere")) {
-            addSolid("Sphere", BREP::Solid::PrimitiveType::Sphere);
-        }
-        if (ImGui::Button("Add Cylinder")) {
-            addSolid("Cylinder", BREP::Solid::PrimitiveType::Cylinder);
-        }
-        if (ImGui::Button("Add Pyramid")) {
-            addSolid("Pyramid", BREP::Solid::PrimitiveType::Pyramid);
-        }
-        
-        ImGui::Separator();
-        ImGui::Text("Grid Settings");
-        
-        Settings& settings = Settings::getInstance();
-        bool gridEnabled = settings.isGridEnabled();
-        if (ImGui::Checkbox("Show Grid", &gridEnabled)) {
-            settings.setGridEnabled(gridEnabled);
+        // Grid Settings section
+        if (IconUtils::IconCollapsingHeader(Icons::VIEW, "Grid Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
+            ImGui::Spacing();
+            
+            Settings& settings = Settings::getInstance();
+            bool gridEnabled = settings.isGridEnabled();
+            if (ImGui::Checkbox("Show Grid", &gridEnabled)) {
+                settings.setGridEnabled(gridEnabled);
+            }
         }
     }
     ImGui::End();

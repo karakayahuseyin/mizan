@@ -1,5 +1,6 @@
 #include "Window.h"
 #include "logger/Logger.h"
+#include "ui/FontManager.h"
 #include <iostream>
 
 Window::Window(int width, int height, const std::string& title)
@@ -109,6 +110,12 @@ bool Window::initImGui() {
         return false;
     }
 
+    // Initialize FontManager for icon support
+    if (!FontManager::getInstance().initialize()) {
+        std::cerr << "Warning: Failed to initialize FontManager" << std::endl;
+        // Continue anyway, as the application can work without icons
+    }
+
     return true;
 }
 
@@ -116,6 +123,9 @@ void Window::cleanupImGui() {
     // Check if ImGui is initialized before shutting down
     ImGuiContext* context = ImGui::GetCurrentContext();
     if (context) {
+        // Cleanup FontManager
+        FontManager::getInstance().cleanup();
+        
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();

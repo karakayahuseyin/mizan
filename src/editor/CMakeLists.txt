@@ -45,6 +45,16 @@ configure_file(${EDITOR_DIR}/renderer/shaders/basic.frag ${CMAKE_BINARY_DIR}/bin
 configure_file(${EDITOR_DIR}/renderer/shaders/wireframe.vert ${CMAKE_BINARY_DIR}/bin/shaders/wireframe.vert COPYONLY)
 configure_file(${EDITOR_DIR}/renderer/shaders/wireframe.frag ${CMAKE_BINARY_DIR}/bin/shaders/wireframe.frag COPYONLY)
 
+# Create assets directory structure in bin
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/bin/assets/fonts)
+
+# Copy font assets if they exist
+file(GLOB FONT_FILES "${CMAKE_SOURCE_DIR}/assets/fonts/*")
+foreach(FONT_FILE ${FONT_FILES})
+    get_filename_component(FONT_NAME ${FONT_FILE} NAME)
+    configure_file(${FONT_FILE} ${CMAKE_BINARY_DIR}/bin/assets/fonts/${FONT_NAME} COPYONLY)
+endforeach()
+
 add_executable(${PROJECT_NAME}Editor
     ${EDITOR_DIR}/main.cpp
     ${EDITOR_DIR}/Application.cpp
@@ -62,6 +72,8 @@ add_executable(${PROJECT_NAME}Editor
     ${EDITOR_DIR}/renderer/Camera.cpp
     ${EDITOR_DIR}/renderer/Shader.cpp
     ${EDITOR_DIR}/logger/Logger.cpp
+    ${EDITOR_DIR}/ui/FontManager.cpp
+    ${EDITOR_DIR}/ui/IconUtils.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}Editor

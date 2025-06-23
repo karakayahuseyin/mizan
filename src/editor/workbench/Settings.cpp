@@ -1,4 +1,6 @@
 #include "Settings.h"
+#include "ui/Icons.h"
+#include "ui/IconUtils.h"
 #include <imgui.h>
 
 Settings& Settings::getInstance() {
@@ -21,7 +23,7 @@ void Settings::renderSettingsWindow() {
     
     if (ImGui::Begin("Settings", &m_showSettingsWindow, flags)) {
         // Grid settings section
-        if (ImGui::CollapsingHeader("Grid Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
+        if (IconUtils::IconCollapsingHeader(Icons::VIEW, "Grid Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
             ImGui::Checkbox("Show Grid", &m_gridEnabled);
             
             float gridColor[3] = { m_gridColor.x, m_gridColor.y, m_gridColor.z };
@@ -39,7 +41,7 @@ void Settings::renderSettingsWindow() {
         }
         
         // Background settings section
-        if (ImGui::CollapsingHeader("Background Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
+        if (IconUtils::IconCollapsingHeader(Icons::SETTINGS, "Background Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
             float bgColor[3] = { m_backgroundColor.x, m_backgroundColor.y, m_backgroundColor.z };
             if (ImGui::ColorEdit3("Background Color", bgColor)) {
                 m_backgroundColor = glm::vec3(bgColor[0], bgColor[1], bgColor[2]);
