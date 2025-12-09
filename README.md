@@ -12,6 +12,7 @@ For other distros, check their package managers.
 ```sh
 # clone this repository
 git clone --recursive https://github.com/karakayahuseyin/mizan.git
-make build
-make run
+mkdir -p build && cd build
+cmake ..
+make
 ```
