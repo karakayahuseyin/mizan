@@ -9,7 +9,16 @@ Mizan is a lightweight 3D geometric modeling kernel built from scratch with mode
 ```bash
 cmake -B build
 cmake --build build
+```
 
-# Install in build directory
+## Test
+
+```bash
+ctest --test-dir build
+```
+
+## Install
+
+```bash
 cmake --install build --prefix build/install
 ```

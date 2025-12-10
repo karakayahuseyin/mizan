@@ -19,7 +19,7 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
   message(FATAL_ERROR "In-source builds not allowed. Use: cmake -B build")
 endif()
 
-option(MIZAN_BUILD_TESTS "Build unit tests" OFF)
+option(MIZAN_BUILD_TESTS "Build unit tests" ON)
 option(MIZAN_BUILD_EXAMPLES "Build examples" OFF)
 
 add_subdirectory(src)
@@ -39,5 +39,4 @@ message(STATUS "  Compiler:   ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERS
 message(STATUS "  Build:      ${CMAKE_BUILD_TYPE}")
 message(STATUS "  Tests:      ${MIZAN_BUILD_TESTS}")
 message(STATUS "  Examples:   ${MIZAN_BUILD_EXAMPLES}")
-message(STATUS "  ASan:       ${MIZAN_ENABLE_ASAN}")
 message(STATUS "")
