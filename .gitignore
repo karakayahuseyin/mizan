@@ -1,0 +1,59 @@
+# Build directories
+build/
+cmake-build-*/
+out/
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+CMakeDoxygenDefaults.cmake
+CMakeDoxyfile.in
+
+# Compiled objects
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.so.*
+*.dylib
+*.dll
+*.exe
+
+# Precompiled headers
+*.gch
+*.pch
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.cproject
+.settings/
+*.user
+*.suo
+*.vcxproj.user
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Dependency directories
+vcpkg_installed/
+_deps/
+
+# compile_commands for clangd
+compile_commands.json
+
+# Testing
+Testing/
+CTestTestfile.cmake
+
+# Package files
+*.tar.gz
+*.zip
