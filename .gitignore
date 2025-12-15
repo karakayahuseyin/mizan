@@ -2,6 +2,7 @@
 build/
 cmake-build-*/
 out/
+.cache
 
 # CMake generated files
 CMakeCache.txt
@@ -57,3 +58,8 @@ CTestTestfile.cmake
 # Package files
 *.tar.gz
 *.zip
+
+# AI tools
+.ai/
+.agent/
+AGENT.md
